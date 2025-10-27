@@ -1,4 +1,4 @@
-FROM mirror.gcr.io/oven/bun:1.1.40
+FROM mirror.gcr.io/oven/bun:1.3.0
 
 WORKDIR /app
 RUN mkdir packages
