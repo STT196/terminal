@@ -6,7 +6,7 @@ COPY packages/go/. .
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o terminal ./cmd/cli/main.go
 
-FROM mirror.gcr.io/oven/bun:1.1.40
+FROM mirror.gcr.io/oven/bun:1.3.0
 WORKDIR /app
 RUN mkdir packages
 COPY package.json ./
