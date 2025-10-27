@@ -72,6 +72,7 @@
         "node-ipinfo": "4.0.1",
         "opencontrol": "0.0.15",
         "sst": "3.17.6",
+        "stripe": "15.2.0",
         "zod": "*",
         "zod-openapi": "4.1.0",
       },
