@@ -15,14 +15,14 @@
   "dependencies": {
     "linkedom": "0.18.6",
     "remeda": "2.3.0",
-    "sst": "3.17.23"
+    "sst": "3.17.6"
   },
   "overrides": {
     "zod": "3.24.1",
     "@openauthjs/openauth": "0.4.3",
     "stripe": "15.2.0",
     "hono": "4.6.12",
-    "sst": "3.17.23"
+    "sst": "3.17.6"
   },
   "devDependencies": {
     "typescript": "5.5.4"
