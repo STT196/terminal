@@ -32,8 +32,10 @@ export default $config({
         }
 
         await $`bun sst deploy`;
-        if (event.type === "branch" && event.branch === "dev")
-          await $`bun run test`.cwd("./packages/functions");
+
+        // TODO(tjdevries) Enable this when we have a test suite
+        // if (event.type === "branch" && event.branch === "dev")
+        //   await $`bun run test`.cwd("./packages/functions");
       },
     },
   },
