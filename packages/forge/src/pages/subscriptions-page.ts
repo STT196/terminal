@@ -23,59 +23,69 @@ type SubscriptionRow = {
 type SubscriptionPageConfig = {
   name: string;
   productFilter: SQL;
-  enableSearch?: boolean;
+  routeName: string;
   getRowMenuItems?: (row: SubscriptionRow) => any[];
   routes?: Record<string, Action>;
-  redirectRoute?: string;
 };
 
 export function createSubscriptionsPage(config: SubscriptionPageConfig) {
   const {
     name,
     productFilter,
-    enableSearch = false,
+    routeName,
     getRowMenuItems,
     routes = {},
-    redirectRoute,
   } = config;
 
   const allRoutes: Record<string, Action> = { ...routes };
 
-  if (redirectRoute) {
-    allRoutes.cancel = new Action({
-      name: "Cancel Subscription",
-      unlisted: true,
-      handler: async () => {
-        const subscriptionId = String(ctx.params.id);
+  // Always create cancel action
+  allRoutes.cancel = new Action({
+    name: "Cancel Subscription",
+    unlisted: true,
+    handler: async () => {
+      const subscriptionId = String(ctx.params.id);
 
-        const confirmed = await io.confirm(
-          `Are you sure you want to cancel this subscription?`
+      const confirmed = await io.confirm(
+        `Are you sure you want to cancel this subscription?`
+      );
+
+      if (confirmed) {
+        // Get subscription to find userID
+        const subscription = await useTransaction(async (tx) =>
+          tx
+            .select({ userID: subscriptionTable.userID })
+            .from(subscriptionTable)
+            .where(eq(subscriptionTable.id, subscriptionId))
+            .limit(1)
+            .then(rows => rows[0])
         );
 
-        if (confirmed) {
-          // Get subscription to find userID
-          const subscription = await useTransaction(async (tx) =>
-            tx
-              .select({ userID: subscriptionTable.userID })
-              .from(subscriptionTable)
-              .where(eq(subscriptionTable.id, subscriptionId))
-              .limit(1)
-              .then(rows => rows[0])
-          );
-
-          if (subscription) {
-            await Actor.provide("system", { userID: subscription.userID }, async () => {
-              await Subscription.cancel(subscriptionId);
-            });
-          }
+        if (subscription) {
+          await Actor.provide("system", { userID: subscription.userID }, async () => {
+            await Subscription.cancel(subscriptionId);
+          });
         }
+      }
 
-        await ctx.redirect({
-          route: redirectRoute,
-        });
+      await ctx.redirect({
+        route: routeName,
+      });
+    },
+  });
+
+  // Always include cancel menu item, merge with custom items
+  const getRowMenuItemsWithCancel = (row: SubscriptionRow) => {
+    const cancelItem = {
+      label: "Cancel",
+      route: `${routeName}/cancel`,
+      params: {
+        id: row.id,
       },
-    });
-  }
+    };
+    const customItems = getRowMenuItems ? getRowMenuItems(row) : [];
+    return [cancelItem, ...customItems];
+  };
 
   return new Page({
     name,
@@ -115,7 +125,7 @@ export function createSubscriptionsPage(config: SubscriptionPageConfig) {
           ),
           io.display.table("Subscriptions", {
             getData: async (input) => {
-              const queryTerm = enableSearch ? input.queryTerm?.trim() : undefined;
+              const queryTerm = input.queryTerm?.trim() || undefined;
               return queries.getAllSubscriptions(
                 {
                   offset: input.offset,
@@ -125,7 +135,7 @@ export function createSubscriptionsPage(config: SubscriptionPageConfig) {
                 queryTerm,
               );
             },
-            rowMenuItems: getRowMenuItems || (() => []),
+            rowMenuItems: getRowMenuItemsWithCancel,
             columns: [
               "id",
               "name",

@@ -20,7 +20,7 @@ const forge = new Forge({
     order: Order,
     inventory: InventoryPage,
     subsCoffee: Subs,
-	subsCron: CronSubs,
+	  subsCron: CronSubs,
     userProfile: UserProfile,
   },
 });
