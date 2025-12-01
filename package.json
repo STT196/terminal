@@ -7,7 +7,9 @@
     "typecheck": "bun --filter=* typecheck",
     "sso": "aws sso login --sso-session=terminal --no-browser",
     "sdk": "sst shell ./packages/scripts/stainless",
-    "cli": "cd ./packages/go && sst shell --stage=dev go run ./cmd/cli/main.go"
+    "cli": "cd ./packages/go && sst shell --stage=dev go run ./cmd/cli/main.go",
+    "test": "sst shell -- bun test",
+    "clean": "rm -rf node_modules packages/*/node_modules"
   },
   "workspaces": [
     "packages/*"

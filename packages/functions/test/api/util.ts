@@ -4,7 +4,6 @@ import { User } from "@terminal/core/user/index";
 import { Api } from "@terminal/core/api/api";
 import { Actor } from "@terminal/core/actor";
 import { z } from "zod";
-import { SchemaValidator } from "./schema-validator";
 import { Card } from "@terminal/core/card/index";
 import { Product } from "@terminal/core/product/index";
 import { Address } from "@terminal/core/address/index";
@@ -179,7 +178,7 @@ export function setupApiTest() {
   /**
    * Make an unauthenticated request
    */
-  const noAuth = app.request;
+  const noAuth = (...args: Parameters<typeof app.request>) => app.request(...args);
 
   /**
    * Run a test with context
@@ -217,6 +216,9 @@ export function setupApiTest() {
     params?: Record<string, string>,
     body?: any,
   ) => {
+    // Lazy-load SchemaValidator to avoid circular dependency issues
+    const { SchemaValidator } = await import("./schema-validator");
+    
     const originalPath = path.toLowerCase();
 
     const pathParams = path.split("/").filter((x) => x.startsWith(":"));
