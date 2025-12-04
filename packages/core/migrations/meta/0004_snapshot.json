@@ -1463,14 +1463,7 @@
           ]
         }
       },
-      "uniqueConstraints": {
-        "short_link_slug_unique": {
-          "name": "short_link_slug_unique",
-          "columns": [
-            "slug"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "subscription": {
       "name": "subscription",
