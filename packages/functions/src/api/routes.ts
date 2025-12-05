@@ -119,6 +119,7 @@ const filter: MiddlewareHandler = async (c, next) => {
 };
 
 export const app = new Hono();
+
 app
   .use(logger())
   .use(async (c, next) => {

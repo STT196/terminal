@@ -4,79 +4,26 @@ import { useTransaction } from "../drizzle/transaction";
 import { fn } from "../util/fn";
 import { createID } from "../util/id";
 import { addressTable } from "./address.sql";
-import { Common } from "../common";
-import { Examples } from "../examples";
 import { Shippo } from "../shippo";
 import { cartTable } from "../cart/cart.sql";
 import { subscriptionTable } from "../subscription/subscription.sql";
 import { VisibleError, ErrorCodes } from "../error";
 import { Actor } from "../actor";
+import {
+  AddressInner,
+  AddressInfo,
+  type AddressInner as AddressInnerType,
+  type AddressInfo as AddressInfoType,
+} from "./schema";
 
 export namespace Address {
-  export const Inner = z
-    .object({
-      name: z.string().openapi({
-        description: "The recipient's name.",
-        example: Examples.Shipping.name,
-      }),
-      street1: z.string().openapi({
-        description: "Street of the address.",
-        example: Examples.Shipping.street1,
-      }),
-      street2: z.string().optional().openapi({
-        description: "Apartment, suite, etc. of the address.",
-        example: Examples.Shipping.street2,
-      }),
-      city: z.string().openapi({
-        description: "City of the address.",
-        example: Examples.Shipping.city,
-      }),
-      province: z.string().optional().openapi({
-        description: "Province or state of the address.",
-        example: Examples.Shipping.province,
-      }),
-      country: z
-        .string()
-        .length(2, "Country must be a 2 character country code (ISO 3166-1)")
-        .openapi({
-          description: "ISO 3166-1 alpha-2 country code of the address.",
-          example: Examples.Shipping.country,
-        }),
-      zip: z.string().openapi({
-        description: "Zip code of the address.",
-        example: Examples.Shipping.zip,
-      }),
-      phone: z.string().optional().openapi({
-        description: "Phone number of the recipient.",
-        example: Examples.Shipping.phone,
-      }),
-    })
-    .openapi({
-      description: "Address information.",
-      example: Examples.Address,
-    });
+  /** @see AddressInner */
+  export const Inner = AddressInner;
+  export type Inner = AddressInnerType;
 
-  export type Inner = z.infer<typeof Inner>;
-
-  export const Info = z
-    .object({
-      id: z.string().openapi({
-        description: Common.IdDescription,
-        example: Examples.Shipping.id,
-      }),
-      ...Inner.shape,
-      created: z.coerce.date().openapi({
-        description: "Date the address was created.",
-        example: Examples.Shipping.created,
-      }),
-    })
-    .openapi({
-      ref: "Address",
-      description: "Physical address associated with a Terminal shop user.",
-      example: Examples.Shipping,
-    });
-
-  export type Info = z.infer<typeof Info>;
+  /** @see AddressInfo */
+  export const Info = AddressInfo;
+  export type Info = AddressInfoType;
 
   export function list() {
     return useTransaction(async (tx) =>

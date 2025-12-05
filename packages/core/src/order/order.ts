@@ -40,6 +40,7 @@ import { pipe, groupBy, values, map } from "remeda";
 import { Common } from "../common";
 import { Examples } from "../examples";
 import { Address } from "../address";
+import { AddressInner } from "../address/schema";
 import { addressTable } from "../address/address.sql";
 import { ProductFilter } from "../product/filter";
 import { Log } from "../util/log";
@@ -103,7 +104,7 @@ export namespace Order {
         description: "Zero-based index of the order for this user only.",
         example: Examples.Order.index,
       }),
-      shipping: Address.Inner.openapi({
+      shipping: AddressInner.openapi({
         description: "Shipping address of the order.",
         example: Examples.Order.shipping,
       }),
@@ -548,7 +549,7 @@ export namespace Order {
     z.object({
       email: z.string().email(),
       items: z.record(z.number().int()),
-      address: Address.Inner,
+      address: AddressInner,
     }),
     async (input) => {
       await Shippo.assertValidAddress(input.address);
