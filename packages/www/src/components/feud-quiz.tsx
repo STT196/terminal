@@ -53,12 +53,6 @@ const FeudQuiz: Component<FeudQuizProps> = (props) => {
     }
   }
 
-  function logout() {
-    localStorage.removeItem('refresh')
-    accessToken = undefined
-    // window.location.replace('/')
-  }
-
   async function callback(code: string, state: string) {
     const challengeStr = sessionStorage.getItem('challenge')
     if (!challengeStr) return
@@ -87,7 +81,7 @@ const FeudQuiz: Component<FeudQuizProps> = (props) => {
   const [loadingText, setLoadingText] = createSignal<LoadingLine[]>([]);
 
   const hasQuestions = () => props.questions && props.questions.length > 0;
-  const currentQuestion = () => hasQuestions() ? props.questions[currentQuestionIndex()] : { id: '0', question: 'No questions available' };
+  const currentQuestion = () => hasQuestions() ? props.questions[currentQuestionIndex()] : { id: '0', text: 'No questions available' };
   const isLastQuestion = () => !hasQuestions() || currentQuestionIndex() === props.questions.length - 1;
 
   onMount(async () => {

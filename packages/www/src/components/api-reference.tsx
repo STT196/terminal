@@ -14,6 +14,34 @@ type EndpointType = {
   operation: OpenAPIV3_1.OperationObject
 }
 
+// Helper to get entries from content objects with proper typing
+function getContentEntries(content: Record<string, OpenAPIV3_1.MediaTypeObject> | undefined): Array<{ contentType: string; mediaType: OpenAPIV3_1.MediaTypeObject }> {
+  if (!content) return []
+  return Object.keys(content).map(key => ({ contentType: key, mediaType: content[key] }))
+}
+
+// Helper to check if an object is a reference (checks for $ref property)
+function isReferenceObject<T>(obj: T | OpenAPIV3_1.ReferenceObject): obj is OpenAPIV3_1.ReferenceObject {
+  return typeof obj === 'object' && obj !== null && '$ref' in obj
+}
+
+// Helper to get request body content (handling reference objects)
+function getRequestBodyContent(requestBody: OpenAPIV3_1.ReferenceObject | OpenAPIV3_1.RequestBodyObject | undefined): Record<string, OpenAPIV3_1.MediaTypeObject> | undefined {
+  if (!requestBody || isReferenceObject(requestBody)) return undefined
+  return requestBody.content
+}
+
+// Helper to get entries from responses object with proper typing  
+function getResponseEntries(responses: OpenAPIV3_1.ResponsesObject | undefined): Array<{ statusCode: string; response: OpenAPIV3_1.ResponseObject }> {
+  if (!responses) return []
+  return Object.keys(responses)
+    .map(key => ({ statusCode: key, responseOrRef: responses[key] }))
+    .filter((entry): entry is { statusCode: string; responseOrRef: OpenAPIV3_1.ResponseObject } => 
+      !isReferenceObject(entry.responseOrRef)
+    )
+    .map(entry => ({ statusCode: entry.statusCode, response: entry.responseOrRef }))
+}
+
 type ApiReferenceProps = {
   schema?: OpenAPIV3_1.Document
   specification?: OpenAPIV3_1.Document
@@ -539,8 +567,8 @@ const ApiReference: Component<ApiReferenceProps> = (props) => {
                           <div class="">
                             <h3 class="font-bold lowercase leading-10 text-gray-11">#request</h3>
                             <Accordion collapsible multiple >
-                              <For each={Object.entries(endpoint.operation.requestBody?.content || {})}>
-                                {([contentType, response]) => (
+                              <For each={getContentEntries(getRequestBodyContent(endpoint.operation.requestBody))}>
+                                {({ contentType, mediaType }) => (
                                   <Accordion.Item value={`${endpoint.id}-${contentType}`} class="">
                                     <Accordion.Header class="">
                                       <Accordion.Trigger class="relative flex items-start gap-2 text-left transition-colors hover:bg-gray-1/10 group/trigger">
@@ -552,7 +580,7 @@ const ApiReference: Component<ApiReferenceProps> = (props) => {
                                           {contentType}
                                         </span>
                                         <span class="text-gray-11 lowercase">
-                                          {response.schema.description}
+                                          {mediaType.schema && typeof mediaType.schema === 'object' && 'description' in mediaType.schema ? mediaType.schema.description : ''}
                                         </span>
                                         <div class="absolute -left-5">
                                           <div class="text-gray-8 group-hover/trigger:text-white group-data-[expanded]/trigger:rotate-90 transition-all duration-100">
@@ -562,18 +590,18 @@ const ApiReference: Component<ApiReferenceProps> = (props) => {
                                       </Accordion.Trigger>
                                     </Accordion.Header>
                                     <Accordion.Content class="pt-1 pb-3">
-                                      <Show when={response.schema}>
+                                      <Show when={mediaType.schema}>
                                         <TabGroup
                                           tabs={[
-                                            ...(response.schema.example ? [{
+                                            ...(mediaType.schema && typeof mediaType.schema === 'object' && 'example' in mediaType.schema && mediaType.schema.example ? [{
                                               label: "example",
                                               value: "example",
-                                              content: JSON.stringify(response.schema.example, null, 2)
+                                              content: JSON.stringify(mediaType.schema.example, null, 2)
                                             }] : []),
                                             {
                                               label: "Schema",
                                               value: "schema",
-                                              content: JSON.stringify(response.schema, null, 2)
+                                              content: JSON.stringify(mediaType.schema, null, 2)
                                             },
                                           ]}
                                         />
@@ -589,8 +617,8 @@ const ApiReference: Component<ApiReferenceProps> = (props) => {
                           <div class="">
                             <h3 class="font-bold lowercase leading-10 text-gray-11">#responses</h3>
                             <Accordion collapsible multiple >
-                              <For each={Object.entries(endpoint.operation.responses || {})}>
-                                {([statusCode, response]) => (
+                              <For each={getResponseEntries(endpoint.operation.responses)}>
+                                {({ statusCode, response }) => (
                                   <Accordion.Item value={`${endpoint.id}-${statusCode}`} class="">
                                     <Accordion.Header class="">
                                       <Accordion.Trigger class="relative flex items-start gap-2 text-left transition-colors hover:bg-gray-1/10 group/trigger">
@@ -616,20 +644,20 @@ const ApiReference: Component<ApiReferenceProps> = (props) => {
                                     </Accordion.Header>
                                     <Accordion.Content class="pt-1 pb-3">
                                       <Show when={response.content}>
-                                        <For each={Object.entries(response.content || {})}>
-                                          {([_contentType, content]) => (
-                                            <Show when={content.schema}>
+                                        <For each={getContentEntries(response.content)}>
+                                          {({ mediaType }) => (
+                                            <Show when={mediaType.schema}>
                                               <TabGroup
                                                 tabs={[
-                                                  ...(content.example ? [{
+                                                  ...(mediaType.example ? [{
                                                     label: "example",
                                                     value: "example",
-                                                    content: JSON.stringify(content.example, null, 2)
+                                                    content: JSON.stringify(mediaType.example, null, 2)
                                                   }] : []),
                                                   {
                                                     label: "Schema",
                                                     value: "schema",
-                                                    content: JSON.stringify(content.schema, null, 2)
+                                                    content: JSON.stringify(mediaType.schema, null, 2)
                                                   },
                                                 ]}
                                               />

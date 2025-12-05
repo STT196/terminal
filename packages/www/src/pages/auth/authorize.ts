@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro'
-import { client, setTokens } from '../../auth'
+import { client } from '../../auth'
 
 export const GET: APIRoute = async (ctx) => {
   const result = await client.authorize(

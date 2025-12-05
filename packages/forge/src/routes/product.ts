@@ -220,7 +220,7 @@ export default new Page({
              ...product.tags,
              ...tags,
            },
-           timeHidden,
+           timeHidden: timeHidden?.jsDate,
          });        await ctx.redirect({
           route: "product/detail",
           params: { productID: product.id },
