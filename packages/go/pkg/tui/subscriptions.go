@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/terminaldotshop/terminal-sdk-go"
+	terminal "github.com/terminaldotshop/terminal-sdk-go"
 )
 
 type subscriptionsState struct {

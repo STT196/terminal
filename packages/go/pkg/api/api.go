@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/stripe/stripe-go/v78"
-	"github.com/terminaldotshop/terminal-sdk-go"
+	terminal "github.com/terminaldotshop/terminal-sdk-go"
 	"github.com/terminaldotshop/terminal/go/pkg/resource"
 
 	"github.com/stripe/stripe-go/v78/token"

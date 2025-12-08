@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/terminaldotshop/terminal-sdk-go"
+	terminal "github.com/terminaldotshop/terminal-sdk-go"
 	"github.com/terminaldotshop/terminal-sdk-go/option"
 	"github.com/terminaldotshop/terminal/go/pkg/resource"
 )

@@ -4,7 +4,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/terminaldotshop/terminal-sdk-go"
+	terminal "github.com/terminaldotshop/terminal-sdk-go"
 	"github.com/terminaldotshop/terminal/go/pkg/tui/validate"
 )
 

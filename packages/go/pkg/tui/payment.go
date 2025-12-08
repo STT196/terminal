@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/stripe/stripe-go/v78"
-	"github.com/terminaldotshop/terminal-sdk-go"
+	terminal "github.com/terminaldotshop/terminal-sdk-go"
 	"github.com/terminaldotshop/terminal/go/pkg/api"
 	"github.com/terminaldotshop/terminal/go/pkg/tui/qrfefe"
 	"github.com/terminaldotshop/terminal/go/pkg/tui/validate"
