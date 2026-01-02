@@ -16,9 +16,8 @@ type accountState struct {
 
 func (m model) updateAccountViewports() model {
 	headerHeight := lipgloss.Height(m.HeaderView())
-	breadcrumbsHeight := lipgloss.Height(m.BreadcrumbsView())
 	footerHeight := lipgloss.Height(m.FooterView())
-	verticalMarginHeight := headerHeight + footerHeight + breadcrumbsHeight
+	verticalMarginHeight := headerHeight + footerHeight
 
 	availableHeight := m.heightContainer - verticalMarginHeight
 

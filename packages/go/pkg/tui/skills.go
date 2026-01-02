@@ -27,9 +27,7 @@ func LoadSkills() []string {
 
 func (m model) SkillsSwitch() (model, tea.Cmd) {
 	m = m.SwitchPage(skillsPage)
-	m.state.footer.commands = []footerCommand{
-		{key: "c", value: "cart"},
-	}
+	m.state.footer.commands = []footerCommand{}
 	return m, nil
 }
 

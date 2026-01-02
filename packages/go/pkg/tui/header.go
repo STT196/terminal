@@ -7,34 +7,21 @@ import (
 )
 
 func (m model) HeaderUpdate(msg tea.Msg) (model, tea.Cmd) {
-	var appsPageIndex int
-	for i, page := range m.accountPages {
-		if page == appsPage {
-			appsPageIndex = i
-			break
-		}
-	}
 
-	if (m.page == shippingPage && m.state.shipping.view == shippingFormView) ||
-		(m.page == paymentPage && m.state.payment.view == paymentFormView) ||
-		(m.page == accountPage && m.state.account.selected == appsPageIndex && m.state.apps.editing) {
-		return m, nil
-	}
+
+
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "c":
-			if m.page != cartPage {
-				return m.CartSwitch()
-			}
+		
 		case "a":
 			return m.ShopSwitch()
-		case "s":
+		case "p":
 			return m.AccountSwitch()
-		case "k":
+		case "s":
 			return m.SkillsSwitch()
-		case "o":
+		case "c":
 			return m.ContactSwitch()
 		// case "f":
 		// 	return m.FaqSwitch()

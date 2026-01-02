@@ -24,8 +24,6 @@ func (m model) MenuUpdate(msg tea.Msg) (model, tea.Cmd) {
 			return m.ShopSwitch()
 		case "a":
 			return m.AccountSwitch()
-		case "c":
-			return m.CartSwitch()
 		case "esc":
 			switch m.state.menu.lastPage {
 			// case aboutPage:

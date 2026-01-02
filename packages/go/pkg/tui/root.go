@@ -81,7 +81,7 @@ type model struct {
 	heightContent   int
 	size            size
 	accessToken     string
-	faqs            []FAQ
+
 	projects        []Project
 	skills          []string
 	error           *VisibleError
@@ -94,21 +94,13 @@ type VisibleError struct {
 type state struct {
 	splash        SplashState
 	cursor        cursorState
-	shipping      shippingState
-	subscriptions subscriptionsState
-	tokens        tokensState
-	apps          appsState
-	orders        ordersState
+
 	shop          shopState
 	account       accountState
 	footer        footerState
-	cart          cartState
-	subscribe     subscribeState
-	payment       paymentState
-	confirm       confirmState
+
 	menu          menuState
-	finalSub      finalSubState
-	final         finalState
+
 }
 
 type children struct {
@@ -136,7 +128,6 @@ func NewModel(
 		fingerprint: fingerprint,
 		anonymous:   anonymous,
 		theme:       theme.BasicTheme(renderer, nil),
-		faqs:        LoadFaqs(),
 		projects:    LoadProjects(),
 		skills:      LoadSkills(),
 		accountPages: []page{
@@ -148,42 +139,7 @@ func NewModel(
 			faqPage,
 			aboutPage,
 		},
-		subscription: terminal.SubscriptionParam{},
-		state: state{
-			splash: SplashState{},
-			shop: shopState{
-				selected: 0,
-			},
-			cart: cartState{
-				selected: 0,
-			},
-			subscribe: subscribeState{
-				selected: 0,
-			},
-			account: accountState{
-				selected: 0,
-			},
-			subscriptions: subscriptionsState{
-				selected: 0,
-			},
-			tokens: tokensState{
-				selected: 0,
-			},
-			orders: ordersState{
-				selected: 0,
-			},
-			payment: paymentState{
-				input: paymentInput{},
-			},
-			shipping: shippingState{
-				input: shippingInput{
-					country: "US",
-				},
-			},
-			footer: footerState{
-				commands: []footerCommand{},
-			},
-		},
+
 	}
 	return result, nil
 }
@@ -213,9 +169,7 @@ func (m model) InitialDataLoaded() (model, tea.Cmd) {
 		}
 	}
 
-	if command == "cart" {
-		return m.CartSwitch()
-	}
+
 
 	accountPageNames := []string{
 		"orders",
@@ -306,7 +260,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.widthContent = m.widthContainer - 2
-		m.heightContent = m.heightContainer - lipgloss.Height(m.HeaderView()) - lipgloss.Height(m.FooterView()) - lipgloss.Height(m.BreadcrumbsView()) - 2
+		m.heightContent = m.heightContainer - lipgloss.Height(m.HeaderView()) - lipgloss.Height(m.FooterView()) - 2
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "esc":
@@ -323,10 +277,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case CursorTickMsg:
 		m, cmd := m.CursorUpdate(msg)
 		return m, cmd
-	case CartUpdatedMsg:
-		if m.state.cart.lastUpdateID == msg.updateID {
-			m.cart = msg.updated
-		}
+
 	case terminal.ViewInitResponseData:
 		m.user = msg.Profile
 		m.products = msg.Products
@@ -372,20 +323,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd = m.ContactUpdate(msg)
 	case shopPage:
 		m, cmd = m.ShopUpdate(msg)
-	case cartPage:
-		m, cmd = m.CartUpdate(msg)
-	case subscribePage:
-		m, cmd = m.SubscribeUpdate(msg)
-	case paymentPage:
-		m, cmd = m.PaymentUpdate(msg)
-	case shippingPage:
-		m, cmd = m.ShippingUpdate(msg)
-	case confirmPage:
-		m, cmd = m.ConfirmUpdate(msg)
-	case finalSubPage:
-		m, cmd = m.FinalSubUpdate(msg)
-	case finalPage:
-		m, cmd = m.FinalUpdate(msg)
+
 	}
 
 	var headerCmd tea.Cmd
@@ -416,16 +354,12 @@ func (m model) View() string {
 	default:
 		header := m.HeaderView()
 		footer := m.FooterView()
-		breadcrumbs := m.BreadcrumbsView()
 
 		// Get content based on current page
 		content := m.getContent()
 
 		height := m.heightContainer
 		height -= lipgloss.Height(header)
-		// if breadcrumbs != "" {
-		height -= lipgloss.Height(breadcrumbs)
-		// }
 		height -= lipgloss.Height(footer)
 
 		body := m.theme.Base().Width(m.widthContainer).Height(height).Render(content)
@@ -436,9 +370,6 @@ func (m model) View() string {
 
 		items := []string{}
 		items = append(items, header)
-		// if breadcrumbs != "" {
-		items = append(items, breadcrumbs)
-		// }
 		items = append(items, body)
 		items = append(items, footer)
 
@@ -465,20 +396,7 @@ func (m model) getContent() string {
 	switch m.page {
 	case shopPage:
 		page = m.ShopView()
-	case cartPage:
-		page = m.CartView()
-	case subscribePage:
-		page = m.SubscribeView()
-	case paymentPage:
-		page = m.PaymentView()
-	case shippingPage:
-		page = m.ShippingView()
-	case confirmPage:
-		page = m.ConfirmView()
-	case finalSubPage:
-		page = m.FinalSubView()
-	case finalPage:
-		page = m.FinalView()
+	
 	case accountPage:
 		page = m.AccountView()
 	case skillsPage:
