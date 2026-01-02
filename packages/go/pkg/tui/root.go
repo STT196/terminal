@@ -33,6 +33,7 @@ const (
 	tokensPage
 	appsPage
 	ordersPage
+	projectsPage
 	aboutPage
 	faqPage
 )
@@ -133,12 +134,11 @@ func NewModel(
 		theme:       theme.BasicTheme(renderer, nil),
 		faqs:        LoadFaqs(),
 		accountPages: []page{
+			projectsPage,
 			ordersPage,
 			subscriptionsPage,
 			tokensPage,
 			appsPage,
-			// shippingPage,
-			// paymentPage,
 			faqPage,
 			aboutPage,
 		},
@@ -332,12 +332,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.apps = msg.Apps
 		m.orders = msg.Orders
 		m.region = &msg.Region
-		m = m.reorderProducts()
 	case terminal.Profile:
 		m.user = msg
 	case []terminal.Product:
 		m.products = msg
-		m = m.reorderProducts()
 	case terminal.Cart:
 		m.cart = msg
 	case []terminal.Card:

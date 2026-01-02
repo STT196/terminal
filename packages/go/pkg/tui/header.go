@@ -30,9 +30,9 @@ func (m model) HeaderUpdate(msg tea.Msg) (model, tea.Cmd) {
 			if m.page != cartPage {
 				return m.CartSwitch()
 			}
-		case "s":
-			return m.ShopSwitch()
 		case "a":
+			return m.ShopSwitch()
+		case "s":
 			return m.AccountSwitch()
 		// case "f":
 		// 	return m.FaqSwitch()
@@ -62,9 +62,9 @@ func (m model) HeaderView() string {
 
 	menu := bold("m") + base(" ☰")
 	mark := bold("t") + cursor
-	logo := bold("terminal")
-	shop := accent("s") + base(" shop")
-	account := accent("a") + base(" account")
+	logo := bold("STT196")
+	shop := accent("a") + base(" about")
+	account := accent("s") + base(" account")
 	// about := accent("a") + base(" about")
 	// faq := accent("f") + base(" faq")
 	cart :=
@@ -75,9 +75,9 @@ func (m model) HeaderView() string {
 
 	switch m.page {
 	case shopPage:
-		shop = accent("s shop")
+		shop = accent("a about")
 	case accountPage:
-		account = accent("a account")
+		account = accent("s account")
 	case cartPage:
 		cart =
 			accent("c") +
