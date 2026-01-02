@@ -109,36 +109,6 @@ func (m model) FooterView() string {
 	lines = append(lines, base("powered by terminal.shop"))
 
 	var content = "STT196"
-	// if m.error != nil {
-	// 	hint := "esc"
-
-	// 	// Calculate maximum width for error message to ensure it fits
-	// 	maxErrorWidth := m.widthContent - lipgloss.Width(hint) - 6
-
-	// 	// Handle wrapping for long error messages
-	// 	errorMsg := m.error.message
-	// 	if lipgloss.Width(errorMsg) > maxErrorWidth {
-	// 		// Split into multiple lines
-	// 		errorMsg = wordWrap(errorMsg, maxErrorWidth)
-	// 	}
-
-	// 	msg := m.theme.PanelError().Padding(0, 1).Render(errorMsg)
-
-	// 	// Calculate remaining space after rendering the message
-	// 	space := max(m.widthContent-lipgloss.Width(msg)-lipgloss.Width(hint)-2, 0)
-
-	// 	height := lipgloss.Height(msg)
-
-	// 	content = lipgloss.JoinHorizontal(
-	// 		lipgloss.Top,
-	// 		msg,
-	// 		m.theme.PanelError().Width(space).Height(height).Render(),
-	// 		m.theme.PanelError().Bold(true).Padding(0, 1).Height(height).Render(hint),
-	// 	)
-	// } else {
-	// 	content = "free shipping on US orders over $40"
-	// }
-
 	footer := lipgloss.JoinVertical(
 		lipgloss.Center,
 		"",

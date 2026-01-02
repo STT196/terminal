@@ -35,6 +35,7 @@ const (
 	ordersPage
 	projectsPage
 	aboutPage
+	contactPage
 	faqPage
 	skillsPage
 )
@@ -367,6 +368,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd = m.AccountUpdate(msg)
 	case aboutPage:
 		m, cmd = m.AboutUpdate(msg)
+	case contactPage:
+		m, cmd = m.ContactUpdate(msg)
 	case shopPage:
 		m, cmd = m.ShopUpdate(msg)
 	case cartPage:
@@ -480,6 +483,8 @@ func (m model) getContent() string {
 		page = m.AccountView()
 	case skillsPage:
 		page = m.SkillsView(m.widthContent)
+	case contactPage:
+		page = m.ContactView(m.widthContent)
 	}
 	return page
 }

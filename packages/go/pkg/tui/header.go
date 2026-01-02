@@ -1,8 +1,6 @@
 package tui
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
@@ -36,6 +34,8 @@ func (m model) HeaderUpdate(msg tea.Msg) (model, tea.Cmd) {
 			return m.AccountSwitch()
 		case "k":
 			return m.SkillsSwitch()
+		case "o":
+			return m.ContactSwitch()
 		// case "f":
 		// 	return m.FaqSwitch()
 		case "m":
@@ -49,13 +49,6 @@ func (m model) HeaderUpdate(msg tea.Msg) (model, tea.Cmd) {
 }
 
 func (m model) HeaderView() string {
-	total := m.cart.Subtotal
-	count := int64(0)
-	if m.cart.Items != nil {
-		for _, item := range m.cart.Items {
-			count += item.Quantity
-		}
-	}
 
 	bold := m.theme.TextAccent().Bold(true).Render
 	accent := m.theme.TextAccent().Render
@@ -66,29 +59,19 @@ func (m model) HeaderView() string {
 	mark := bold("t") + cursor
 	logo := bold("STT196")
 	shop := accent("a") + base(" about")
-	account := accent("s") + base(" account")
-	skills := accent("k") + base(" skills")
-	// about := accent("a") + base(" about")
-	// faq := accent("f") + base(" faq")
-	cart :=
-		accent("c") +
-			base(" cart") +
-			accent(fmt.Sprintf(" $%2v", total/100)) +
-			base(fmt.Sprintf(" [%d]", count))
+	account := accent("p") + base(" projects")
+	skills := accent("s") + base(" skills")
+	contact := accent("c") + base(" contact")
 
 	switch m.page {
 	case shopPage:
 		shop = accent("a about")
 	case accountPage:
-		account = accent("s account")
+		account = accent("p projects")
 	case skillsPage:
-		skills = accent("k skills")
-	case cartPage:
-		cart =
-			accent("c") +
-				accent(" cart") +
-				accent(fmt.Sprintf(" $%2v", total/100)) +
-				base(fmt.Sprintf(" [%d]", count))
+		skills = accent("s skills")
+	case contactPage:
+		contact = accent("c contact")
 	}
 
 	var tabs []string
@@ -97,13 +80,11 @@ func (m model) HeaderView() string {
 	case small:
 		tabs = []string{
 			mark,
-			cart,
 		}
 	case medium:
 		tabs = []string{
 			menu,
 			logo,
-			cart,
 		}
 	default:
 		tabs = []string{
@@ -111,9 +92,7 @@ func (m model) HeaderView() string {
 			shop,
 			account,
 			skills,
-			// about,
-			// faq,
-			cart,
+			contact,
 		}
 	}
 
