@@ -97,64 +97,47 @@ func (m model) FooterView() string {
 		return table.Render(bold("m") + base(" menu"))
 	}
 
-	// Note: Region selection is now handled server-side based on client IP
-	// but we keep the UI indicator to show which region's products are displayed
-	naFlag := "🇺🇸"    // US flag for North America
-	euFlag := "🇪🇺"    // EU flag
-	globalFlag := "🌎" // Globe for global
-
-	var regionSelector string
-	if m.region == nil || *m.region == terminal.RegionNa {
-		regionSelector = base(" " + naFlag + " (US)")
-	} else if *m.region == terminal.RegionEu {
-		regionSelector = base(" " + euFlag + " (EU)")
-	} else {
-		regionSelector = base(" " + globalFlag + " (Global)")
-	}
-
-	// Add other commands
+	// Add commands
 	commands := []string{}
 	for _, cmd := range m.state.footer.commands {
 		commands = append(commands, bold(" "+cmd.key+" ")+base(cmd.value+"  "))
 	}
 
 	lines := []string{}
-	if m.page == shopPage {
-		lines = append(lines, bold("r")+regionSelector)
-		lines = append(lines, base("  "))
-	}
 	lines = append(lines, commands...)
+	lines = append(lines, base("  "))
+	lines = append(lines, base("powered by terminal.shop"))
 
-	var content string
-	if m.error != nil {
-		hint := "esc"
+	var content = "STT196"
+	// if m.error != nil {
+	// 	hint := "esc"
 
-		// Calculate maximum width for error message to ensure it fits
-		maxErrorWidth := m.widthContent - lipgloss.Width(hint) - 6
+	// 	// Calculate maximum width for error message to ensure it fits
+	// 	maxErrorWidth := m.widthContent - lipgloss.Width(hint) - 6
 
-		// Handle wrapping for long error messages
-		errorMsg := m.error.message
-		if lipgloss.Width(errorMsg) > maxErrorWidth {
-			// Split into multiple lines
-			errorMsg = wordWrap(errorMsg, maxErrorWidth)
-		}
+	// 	// Handle wrapping for long error messages
+	// 	errorMsg := m.error.message
+	// 	if lipgloss.Width(errorMsg) > maxErrorWidth {
+	// 		// Split into multiple lines
+	// 		errorMsg = wordWrap(errorMsg, maxErrorWidth)
+	// 	}
 
-		msg := m.theme.PanelError().Padding(0, 1).Render(errorMsg)
+	// 	msg := m.theme.PanelError().Padding(0, 1).Render(errorMsg)
 
-		// Calculate remaining space after rendering the message
-		space := max(m.widthContent-lipgloss.Width(msg)-lipgloss.Width(hint)-2, 0)
+	// 	// Calculate remaining space after rendering the message
+	// 	space := max(m.widthContent-lipgloss.Width(msg)-lipgloss.Width(hint)-2, 0)
 
-		height := lipgloss.Height(msg)
+	// 	height := lipgloss.Height(msg)
 
-		content = lipgloss.JoinHorizontal(
-			lipgloss.Top,
-			msg,
-			m.theme.PanelError().Width(space).Height(height).Render(),
-			m.theme.PanelError().Bold(true).Padding(0, 1).Height(height).Render(hint),
-		)
-	} else {
-		content = "free shipping on US orders over $40"
-	}
+	// 	content = lipgloss.JoinHorizontal(
+	// 		lipgloss.Top,
+	// 		msg,
+	// 		m.theme.PanelError().Width(space).Height(height).Render(),
+	// 		m.theme.PanelError().Bold(true).Padding(0, 1).Height(height).Render(hint),
+	// 	)
+	// } else {
+	// 	content = "free shipping on US orders over $40"
+	// }
 
 	footer := lipgloss.JoinVertical(
 		lipgloss.Center,

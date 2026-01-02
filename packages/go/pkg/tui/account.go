@@ -22,27 +22,26 @@ func (m model) updateAccountViewports() model {
 
 	availableHeight := m.heightContainer - verticalMarginHeight
 
-	// Calculate menu width based on projects
-	menuWidth := 10 // "projects" has 8 chars
-	if menuWidth > 0 {
-		menuWidth += 4
-	}
+	var menuWidth, detailWidth int
 
-	// For small screens, make the menu full width
 	if m.size < large {
+		// For small screens, full width for both
 		menuWidth = m.widthContent
-	}
-
-	detailWidth := m.widthContent - menuWidth
-	if m.size < large {
 		detailWidth = m.widthContent
+	} else {
+		// For large screens, split the available width
+		menuWidth = 20
+		spacer := 2 // for "  " separator
+		detailWidth = m.widthContent - menuWidth - spacer
+		if detailWidth < 60 {
+			detailWidth = 60
+		}
 	}
 
 	if !m.state.account.viewportsReady {
 		// Initialize viewports for the first time
 		m.state.account.menuViewport = viewport.New(menuWidth, availableHeight)
 		m.state.account.menuViewport.KeyMap = viewport.KeyMap{}
-
 		m.state.account.detailViewport = viewport.New(detailWidth, availableHeight)
 		m.state.account.detailViewport.KeyMap = modifiedKeyMap
 
@@ -66,6 +65,7 @@ func (m model) AccountSwitch() (model, tea.Cmd) {
 
 	m.state.footer.commands = []footerCommand{
 		{key: "↑/↓", value: "navigate"},
+		{key: "PgUp/PgDn", value: "scroll"},
 	}
 
 	m = m.updateAccountViewports()
@@ -87,13 +87,21 @@ func (m model) AccountUpdate(msg tea.Msg) (model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab", "down", "j":
-			if m.state.account.selected < len(projects)-1 {
+			if m.state.account.selected < len(m.projects)-1 {
 				m.state.account.selected++
+				// Scroll menu to keep selected item visible
+				m.state.account.menuViewport.LineDown(2)
 			}
 		case "shift+tab", "up", "k":
 			if m.state.account.selected > 0 {
 				m.state.account.selected--
+				// Scroll menu to keep selected item visible
+				m.state.account.menuViewport.LineUp(2)
 			}
+		case "pgup":
+			m.state.account.detailViewport.LineUp(5)
+		case "pgdown":
+			m.state.account.detailViewport.LineDown(5)
 		}
 	}
 
@@ -102,11 +110,11 @@ func (m model) AccountUpdate(msg tea.Msg) (model, tea.Cmd) {
 		menuContent := m.getProjectsMenuContent()
 		m.state.account.menuViewport.SetContent(menuContent)
 
-		detailContent := m.getProjectsContent()
+		detailContent := m.getProjectsContent(m.state.account.detailViewport.Width - 4)
 		m.state.account.detailViewport.SetContent(detailContent)
 	}
 
-	// Update the detailViewport with the message
+	// Only update detail viewport for scroll; menu stays static
 	m.state.account.detailViewport, cmd = m.state.account.detailViewport.Update(msg)
 	cmds = append(cmds, cmd)
 
@@ -126,7 +134,7 @@ func (m model) AccountView() string {
 	m.state.account.menuViewport.SetContent(menuContent)
 
 	// Show selected project details on the right
-	detailContent := m.getProjectsContent()
+	detailContent := m.getProjectsContent(m.state.account.detailViewport.Width - 4)
 	m.state.account.detailViewport.SetContent(detailContent)
 
 	// Combine viewport views
@@ -147,60 +155,3 @@ func (m model) AccountView() string {
 		)
 	}
 }
-
-// Helper function to scroll the detail viewport to show the selected item in focused account pages
-// func (m model) scrollToAccountDetailItem(model model, accountPage page) model {
-// 	// If orders page is in detail view, we don't need to scroll to a specific item
-// 	if accountPage == ordersPage && model.state.orders.viewing {
-// 		return model
-// 	}
-
-// 	var itemHeight int
-// 	var itemCount int
-// 	var selectedIndex int
-
-// 	// Different item heights and counts based on the page
-// 	switch accountPage {
-// 	case subscriptionsPage:
-// 		itemHeight = 5 // Estimated height of a subscription item with padding
-// 		itemCount = len(model.subscriptions)
-// 		selectedIndex = model.state.subscriptions.selected
-// 	case tokensPage:
-// 		itemHeight = 7                    // Estimated height of a token item with padding
-// 		itemCount = len(model.tokens) + 1 // +1 for "add token" button
-// 		selectedIndex = model.state.tokens.selected
-// 	case appsPage:
-// 		itemHeight = 8                  // Estimated height of an app item with padding
-// 		itemCount = len(model.apps) + 1 // +1 for "create app" button
-// 		selectedIndex = model.state.apps.selected
-// 	case ordersPage:
-// 		itemHeight = 4 // Reduced height for order item with just date (instead of all products)
-// 		itemCount = len(model.orders)
-// 		selectedIndex = model.state.orders.selected
-// 	default:
-// 		return model // No scrolling for other pages
-// 	}
-
-// 	if itemCount == 0 {
-// 		return model // No items to scroll to
-// 	}
-
-// 	// Calculate approximate position of selected item
-// 	targetY := (selectedIndex * itemHeight) + 2
-
-// 	// Calculate offset to position item in the visible area
-// 	viewportHeight := model.state.account.detailViewport.Height
-// 	currentOffset := model.state.account.detailViewport.YOffset
-
-// 	// If item is above viewport, scroll up to show it
-// 	if targetY < currentOffset {
-// 		model.state.account.detailViewport.SetYOffset(targetY - 2)
-// 	}
-
-// 	// If item is below viewport, scroll down to show it
-// 	if targetY+itemHeight > currentOffset+viewportHeight {
-// 		model.state.account.detailViewport.SetYOffset(targetY - viewportHeight + itemHeight)
-// 	}
-
-// 	return model
-// }

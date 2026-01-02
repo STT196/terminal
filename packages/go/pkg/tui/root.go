@@ -36,6 +36,7 @@ const (
 	projectsPage
 	aboutPage
 	faqPage
+	skillsPage
 )
 
 const (
@@ -80,6 +81,8 @@ type model struct {
 	size            size
 	accessToken     string
 	faqs            []FAQ
+	projects        []Project
+	skills          []string
 	error           *VisibleError
 }
 
@@ -133,6 +136,8 @@ func NewModel(
 		anonymous:   anonymous,
 		theme:       theme.BasicTheme(renderer, nil),
 		faqs:        LoadFaqs(),
+		projects:    LoadProjects(),
+		skills:      LoadSkills(),
 		accountPages: []page{
 			projectsPage,
 			ordersPage,
@@ -473,6 +478,8 @@ func (m model) getContent() string {
 		page = m.FinalView()
 	case accountPage:
 		page = m.AccountView()
+	case skillsPage:
+		page = m.SkillsView(m.widthContent)
 	}
 	return page
 }
