@@ -30,7 +30,7 @@ func BasicTheme(renderer *lipgloss.Renderer, highlight *string) Theme {
 	base.border = lipgloss.AdaptiveColor{Dark: "#3A3F42", Light: "#D7DBDF"}
 	base.body = lipgloss.AdaptiveColor{Dark: "#889096", Light: "#889096"}
 	base.accent = lipgloss.AdaptiveColor{Dark: "#FFFFFF", Light: "#11181C"}
-	base.brand = lipgloss.Color("#FF5C00")
+	base.brand = lipgloss.Color("#39ff14")
 	if highlight != nil {
 		base.highlight = lipgloss.Color(*highlight)
 	} else {

@@ -116,7 +116,6 @@ func main() {
 
 type sshOutput struct {
 	ssh.Session
-	tty *os.File
 }
 
 func (s *sshOutput) Write(p []byte) (int, error) {
@@ -128,7 +127,7 @@ func (s *sshOutput) Read(p []byte) (int, error) {
 }
 
 func (s *sshOutput) Fd() uintptr {
-	return s.tty.Fd()
+	return 0
 }
 
 // You can wire any Bubble Tea model up to the middleware with a function that
@@ -139,7 +138,6 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	pty, _, _ := s.Pty()
 	sessionBridge := &sshOutput{
 		Session: s,
-		tty:     pty.Slave,
 	}
 	renderer := bubbletea.MakeRenderer(sessionBridge)
 	fingerprint := s.Context().Value("fingerprint").(string)
