@@ -7,8 +7,7 @@ import (
 
 func (m model) ContactSwitch() (model, tea.Cmd) {
 	m = m.SwitchPage(contactPage)
-	m.state.footer.commands = []footerCommand{
-	}
+	m.state.footer.commands = []footerCommand{}
 	return m, nil
 }
 
@@ -30,5 +29,7 @@ func (m model) ContactView(totalWidth int) string {
 		base("GitHub: ")+accent("https://github.com/STT196")+m.CursorView(),
 		"",
 		base("Email: ")+accent("thisaratharindaciscoitn@gmail.com"),
+		"",
+		base("My Resume: ")+accent("https://drive.google.com/file/d/1mKMDVaV5gxtqicgpPNKigoVa4bjxbLOR/view?usp=sharing"),
 	)
 }

@@ -11,8 +11,7 @@ FROM alpine:3.19
 WORKDIR /app
 RUN adduser -S -D terminal
 COPY --from=build /out/terminal-ssh /usr/local/bin/terminal-ssh
-# env vars (adjust ports as needed)
-ENV PORT=8080
-EXPOSE 8080
 USER terminal
+ENV SSH_PORT=22
+
 ENTRYPOINT ["/usr/local/bin/terminal-ssh"]

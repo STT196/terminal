@@ -18,6 +18,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/muesli/termenv"
+
 	// "github.com/terminaldotshop/terminal/go/pkg/resource"
 	"github.com/terminaldotshop/terminal/go/pkg/tui"
 
@@ -86,8 +87,12 @@ func main() {
 		httpPort = "8000"
 	}
 
-	// Use embedded permanent SSH host key
-	hostKeyPEM := []byte(permanentHostKey)
+	// Load SSH host key from environment or use embedded fallback for dev
+	hostKeyPEM := []byte(os.Getenv("SSH_HOST_KEY"))
+	if len(hostKeyPEM) == 0 {
+		log.Warn("SSH_HOST_KEY not set, using embedded key (not recommended for production)")
+		hostKeyPEM = []byte(permanentHostKey)
+	}
 
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort("0.0.0.0", sshPort)),

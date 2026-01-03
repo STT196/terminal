@@ -71,6 +71,8 @@ func (m model) FooterView() string {
 	for _, cmd := range m.state.footer.commands {
 		commands = append(commands, bold(" "+cmd.key+" ")+base(cmd.value+"  "))
 	}
+	// Always add quit command
+	commands = append(commands, bold(" q ")+base("quit  "))
 
 	lines := []string{}
 	lines = append(lines, commands...)

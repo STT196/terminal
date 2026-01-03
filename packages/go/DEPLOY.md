@@ -55,11 +55,10 @@ sudo systemctl reload nginx
 6. **Run the container**
 ```bash
 docker run -d \
-  --name terminal-ssh \
-  --restart unless-stopped \
   -p 2222:2222 \
-  -p 8000:8000 \
-  terminal-ssh:latest
+  -v /host_key.pem:/keys/host_key.pem:ro \
+  -e SSH_HOST_KEY=/keys/host_key.pem \
+  your-image-name
 ```
 
 ## Access
