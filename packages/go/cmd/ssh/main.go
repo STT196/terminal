@@ -4,11 +4,10 @@ package main
 // and continually print up to date terminal information.
 
 import (
+	"context"
 	"crypto/md5"
 	_ "embed"
 	"encoding/hex"
-
-	"context"
 	"errors"
 	"log/slog"
 	"net"
@@ -19,7 +18,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/muesli/termenv"
-	"github.com/terminaldotshop/terminal/go/pkg/resource"
+	// "github.com/terminaldotshop/terminal/go/pkg/resource"
 	"github.com/terminaldotshop/terminal/go/pkg/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -42,6 +41,34 @@ const (
 	PasswordAccepted
 )
 
+const permanentHostKey = `-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
+NhAAAAAwEAAQAAAQEAvSGNhXTkqQWKlnRrTU/tpAnfzAKs4onXRZ4kQnKMcTehkDSzjl+p
+Orp8mHTwtsOMIhYTGH63dUeNuE0ZPAB06Ix8oSgmFmnMBOItirlb4yRZR/mNMRtXJEU4N/
+KIWQTFEpxSFXHyWxrzLD1ab8VInBa4uDZpwKFFb9uxFhZRzbTjIealJXuu+KuzbnbzarA3
+AFi367Z8WxqjFJaS/mUt90j4KSZFPstcL1I9hoVkxE1Pdox/7IT/NZ3bRUv3KAcv+W9iwZ
+ec8nwzpiXPOHdiHt61n5VT6/Ls92l2z1CcyiU9Gl+TLiZtUqG6VzLz2uzC67ONV2RotIbq
+PBLl3g3ZPQAAA8gO33pFDt96RQAAAAdzc2gtcnNhAAABAQC9IY2FdOSpBYqWdGtNT+2kCd
+/MAqziiddFniRCcoxxN6GQNLOOX6k6unyYdPC2w4wiFhMYfrd1R424TRk8AHTojHyhKCYW
+acwE4i2KuVvjJFlH+Y0xG1ckRTg38ohZBMUSnFIVcfJbGvMsPVpvxUicFri4NmnAoUVv27
+EWFlHNtOMh5qUle674q7NudvNqsDcAWLfrtnxbGqMUlpL+ZS33SPgpJkU+y1wvUj2GhWTE
+TU92jH/shP81ndtFS/coBy/5b2LBl5zyfDOmJc84d2Ie3rWflVPr8uz3aXbPUJzKJT0aX5
+MuJm1SobpXMvPa7MLrs41XZGi0huo8EuXeDdk9AAAAAwEAAQAAAQB47qhgKlM/ZCSueXhW
+8gGgvxOTji5fmAXHJQxIVJhKmGi9HYWmRrKds7qRfUyhgD3tWbISGoxR+FO9Acdd32jhfV
+r/bP2VnUZv5PN73XPMtGRGKmJGgRXiQkRlObZHPU6JzNyLi9WMvZm5su1NxJbd/4VTfK94
+FWah1JbR6ama3rHuSELcT2rWGh0m62Sgx51GbUDAXFT2KiQADyzAYzMVjbKcG42u5saNKk
+nZOjJN7EWy+haSnXwAa7K90yIMo16iak4CNtorazQ5p8AVK3ZVb+pmiYbitneVOPbea1zR
+AindLx9FO9Q5d8f4fZ5sLRP7nF1D6HDUMwRNrwqY+209AAAAgQCrP3qyCuEd6CRLp9O8EO
+8O810fCazuPT0IDvUaD94yH8/K0ZU5PIVsyOhdCe0egiiVw3LtIetPOMMAfW1C4Iiq8NCd
+uZwDf74nu67QaPIP77+X3IZ46ipuukZnCgLxfpaZYscEZyuri2Fbb+P4BzzjQvOpkWUGzh
+Y4X/M9EBK/WgAAAIEA6WkLdSLopxY600yyLT2Xg/WzzaElFBbLNPdhXVPq6CE3XVAZmyyf
+snk478h5mkTD7dXyHV2vIW9/q1I/xXz6u6ZsOR5t3GXNAAI3aTYcxhoCWERMsWb1dDjSLR
+CJdx8xyJu6pRYqVkRukfhgR+ZoGY2PEpX2PXa/sRIZlQRzGKMAAACBAM9vctgPgvmthLp4
+KNr+qPoELwcUWxC1dJpMt4d4B4LkQV1OcKotnBEZ8jx2emqqKYCE8tvtqntsvofclExnHQ
+bO+9qHLBh+bf7uqdmw1mTo6QxOEf4sFTc7nZYAki+wwsXUHCuBf+7TVTs4pmM/FREFoeMQ
+6TT4GWlV8EwRBQSfAAAAEXRlcm1pbmFsLXNzaC1ob3N0AQ==
+-----END OPENSSH PRIVATE KEY-----`
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	signalChan := make(chan os.Signal, 1)
@@ -59,9 +86,12 @@ func main() {
 		httpPort = "8000"
 	}
 
+	// Use embedded permanent SSH host key
+	hostKeyPEM := []byte(permanentHostKey)
+
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort("0.0.0.0", sshPort)),
-		wish.WithHostKeyPEM([]byte(resource.Resource.SSHKey.Private)),
+		wish.WithHostKeyPEM(hostKeyPEM),
 		wish.WithMiddleware(
 			recover.Middleware(
 				bubbletea.Middleware(teaHandler),
@@ -86,6 +116,7 @@ func main() {
 	)
 	if err != nil {
 		log.Error("Could not start server", "error", err)
+		return
 	}
 
 	log.Info("Starting SSH server", "port", sshPort)

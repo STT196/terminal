@@ -5,7 +5,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	terminal "github.com/terminaldotshop/terminal-sdk-go"
 )
 
 type footerState struct {
@@ -47,38 +46,8 @@ func wordWrap(text string, maxWidth int) string {
 
 // ToggleRegion switches between regions and creates a new client with the updated region header
 func (m model) ToggleRegion() (model, tea.Cmd) {
-	// Toggle between "na", "eu", and "global"
-	var newRegion terminal.Region
-
-	if m.region == nil || *m.region == terminal.RegionNa {
-		newRegion = terminal.RegionEu
-	} else if *m.region == terminal.RegionEu {
-		newRegion = terminal.RegionGlobal
-	} else {
-		newRegion = terminal.RegionNa
-	}
-
-	// Update the model's region
-	m.region = &newRegion
-
-	// Create new client with updated region
-	m.client = m.CreateSDKClient()
-
-	// Return command to reload data
-	cmd := func() tea.Msg {
-		_, err := m.client.Cart.Clear(m.context)
-		if err != nil {
-			return err
-		}
-
-		response, err := m.client.View.Init(m.context)
-		if err != nil {
-			return err
-		}
-		return response.Data
-	}
-
-	return m, cmd
+	// No-op in simplified site
+	return m, nil
 }
 
 func (m model) FooterView() string {

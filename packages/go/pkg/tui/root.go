@@ -82,9 +82,9 @@ type model struct {
 	size            size
 	accessToken     string
 
-	projects        []Project
-	skills          []string
-	error           *VisibleError
+	projects []Project
+	skills   []string
+	error    *VisibleError
 }
 
 type VisibleError struct {
@@ -92,15 +92,14 @@ type VisibleError struct {
 }
 
 type state struct {
-	splash        SplashState
-	cursor        cursorState
+	splash SplashState
+	cursor cursorState
 
-	shop          shopState
-	account       accountState
-	footer        footerState
+	shop    shopState
+	account accountState
+	footer  footerState
 
-	menu          menuState
-
+	menu menuState
 }
 
 type children struct {
@@ -139,7 +138,6 @@ func NewModel(
 			faqPage,
 			aboutPage,
 		},
-
 	}
 	return result, nil
 }
@@ -168,8 +166,6 @@ func (m model) InitialDataLoaded() (model, tea.Cmd) {
 			return m.ShopSwitch()
 		}
 	}
-
-
 
 	accountPageNames := []string{
 		"orders",
@@ -396,7 +392,7 @@ func (m model) getContent() string {
 	switch m.page {
 	case shopPage:
 		page = m.ShopView()
-	
+
 	case accountPage:
 		page = m.AccountView()
 	case skillsPage:
