@@ -37,12 +37,12 @@ func (m model) ProjectsUpdate(msg tea.Msg) (model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab", "down", "j":
-			if m.state.account.selected < len(m.projects)-1 {
-				m.state.account.selected++
+			if m.state.project.selected < len(m.projects)-1 {
+				m.state.project.selected++
 			}
 		case "shift+tab", "up", "k":
-			if m.state.account.selected > 0 {
-				m.state.account.selected--
+			if m.state.project.selected > 0 {
+				m.state.project.selected--
 			}
 		}
 	}
@@ -54,11 +54,10 @@ func (m model) getProjectsContent(totalWidth int) string {
 		return "No projects available"
 	}
 
-	project := m.projects[m.state.account.selected]
+	project := m.projects[m.state.project.selected]
 
 	var content strings.Builder
 	content.WriteString(m.theme.TextAccent().Render(wordWrap(project.Name, totalWidth)) + "\n")
-	content.WriteString(m.theme.Base().Render(project.Year) + "\n\n")
 	content.WriteString(m.theme.TextHighlight().Render("Technologies:") + "\n")
 	content.WriteString(m.theme.Base().Render(wordWrap(project.Technologies, totalWidth)) + "\n\n")
 	content.WriteString(m.theme.TextHighlight().Render("Details:") + "\n")
@@ -93,7 +92,7 @@ func (m model) getProjectsMenuContent() string {
 			Foreground(m.theme.Accent())
 	} else {
 		// Use the actual menu viewport width
-		menuWidth := m.state.account.menuViewport.Width
+		menuWidth := m.state.project.menuViewport.Width
 		if menuWidth == 0 {
 			menuWidth = 20 // fallback
 		}
@@ -110,10 +109,10 @@ func (m model) getProjectsMenuContent() string {
 	var content strings.Builder
 	for i, p := range m.projects {
 		var item string
-		if i == m.state.account.selected {
-			item = highlightedMenuItem.Render(wordWrap(p.Name+" ("+p.Year+")", m.state.account.menuViewport.Width-2))
+		if i == m.state.project.selected {
+			item = highlightedMenuItem.Render(wordWrap(p.Name, m.state.project.menuViewport.Width-2))
 		} else {
-			item = menuItem.Render(wordWrap(p.Name+" ("+p.Year+")", m.state.account.menuViewport.Width-2))
+			item = menuItem.Render(wordWrap(p.Name, m.state.project.menuViewport.Width-2))
 		}
 		content.WriteString(item + "\n")
 		// Add spacing between menu items

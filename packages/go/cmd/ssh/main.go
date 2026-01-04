@@ -11,7 +11,6 @@ import (
 	"errors"
 	"log/slog"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,7 +18,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/muesli/termenv"
 
-	// "github.com/terminaldotshop/terminal/go/pkg/resource"
+
 	"github.com/terminaldotshop/terminal/go/pkg/tui"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -79,12 +78,8 @@ func main() {
 		cancel()
 	}()
 	sshPort := os.Getenv("SSH_PORT")
-	httpPort := os.Getenv("HTTP_PORT")
 	if sshPort == "" {
 		sshPort = "2222"
-	}
-	if httpPort == "" {
-		httpPort = "8000"
 	}
 
 	// Load SSH host key from environment or use embedded fallback for dev
@@ -129,19 +124,6 @@ func main() {
 		if err = s.ListenAndServe(); err != nil && !errors.Is(err, ssh.ErrServerClosed) {
 			log.Error("Could not start server", "error", err)
 			cancel()
-		}
-	}()
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://www.terminal.shop", http.StatusFound)
-	})
-
-	// Listen on port 80
-	go func() {
-		defer cancel()
-		err := http.ListenAndServe(":"+httpPort, nil)
-		if err != nil {
-			log.Fatal("ListenAndServe error:", err)
 		}
 	}()
 

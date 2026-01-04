@@ -20,23 +20,10 @@ type size = int
 const (
 	menuPage page = iota
 	splashPage
-	shopPage
-	accountPage
-	paymentPage
-	cartPage
-	subscribePage
-	shippingPage
-	confirmPage
-	finalSubPage
-	finalPage
-	subscriptionsPage
-	tokensPage
-	appsPage
-	ordersPage
-	projectsPage
 	aboutPage
+	projectsPage
 	contactPage
-	faqPage
+
 	skillsPage
 )
 
@@ -95,8 +82,8 @@ type state struct {
 	splash SplashState
 	cursor cursorState
 
-	shop    shopState
-	account accountState
+	about   aboutState
+	project projectState
 	footer  footerState
 
 	menu menuState
@@ -129,15 +116,14 @@ func NewModel(
 		theme:       theme.BasicTheme(renderer, nil),
 		projects:    LoadProjects(),
 		skills:      LoadSkills(),
-		accountPages: []page{
-			projectsPage,
-			ordersPage,
-			subscriptionsPage,
-			tokensPage,
-			appsPage,
-			faqPage,
-			aboutPage,
-		},
+		// Initialize with reasonable defaults for large screens
+		viewportWidth:   100,
+		viewportHeight:  40,
+		widthContainer:  80,
+		heightContainer: 30,
+		widthContent:    78,
+		heightContent:   25,
+		size:            large,
 	}
 	return result, nil
 }
@@ -154,7 +140,7 @@ func (m model) SwitchPage(page page) model {
 
 func (m model) InitialDataLoaded() (model, tea.Cmd) {
 	if len(m.command) == 0 {
-		return m.ShopSwitch()
+		return m.AboutSwitch()
 	}
 
 	// TODO: support multiple commands?
@@ -162,55 +148,12 @@ func (m model) InitialDataLoaded() (model, tea.Cmd) {
 
 	for index, product := range m.products {
 		if strings.ToLower(product.Name) == command {
-			m.state.shop.selected = index
-			return m.ShopSwitch()
+			m.state.about.selected = index
+			return m.AboutSwitch()
 		}
 	}
 
-	accountPageNames := []string{
-		"orders",
-		"subscriptions",
-		"tokens",
-		"apps",
-		"faq",
-		"about",
-	}
-	for _, name := range accountPageNames {
-		if strings.HasPrefix(name, command) {
-			m, cmd := m.AccountSwitch()
-
-			selected := 0
-			for index, page := range m.accountPages {
-				if name == "orders" && page == ordersPage {
-					selected = index
-					break
-				} else if name == "subscriptions" && page == subscriptionsPage {
-					selected = index
-					break
-				} else if name == "tokens" && page == tokensPage {
-					selected = index
-					break
-				} else if name == "apps" && page == appsPage {
-					selected = index
-					break
-				} else if name == "faq" && page == faqPage {
-					selected = index
-					break
-				} else if name == "about" && page == aboutPage {
-					selected = index
-					break
-				}
-			}
-
-			m.state.account.selected = selected
-			if m.state.account.selected > 0 {
-				m.state.account.focused = true
-			}
-			return m, cmd
-		}
-	}
-
-	return m.ShopSwitch()
+	return m.AboutSwitch()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -223,7 +166,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.error = &VisibleError{
 			message: api.GetErrorMessage(msg),
 		}
-		if m.page == shopPage || m.page == cartPage {
+		if m.page == aboutPage{
 			cmds = append(cmds, func() tea.Msg {
 				response, err := m.client.Cart.Get(m.context)
 				if err != nil {
@@ -241,18 +184,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.size = undersized
 			m.widthContainer = m.viewportWidth
 			m.heightContainer = m.viewportHeight
-		case m.viewportWidth < 50:
+		case m.viewportWidth < 60:
 			m.size = small
 			m.widthContainer = m.viewportWidth
 			m.heightContainer = m.viewportHeight
-		case m.viewportWidth < 80:
+		case m.viewportWidth < 90:
 			m.size = medium
-			m.widthContainer = 50
-			m.heightContainer = int(math.Min(float64(msg.Height), 30))
+			m.widthContainer = 70
+			m.heightContainer = int(math.Min(float64(msg.Height), 35))
 		default:
 			m.size = large
-			m.widthContainer = 80
-			m.heightContainer = int(math.Min(float64(msg.Height), 30))
+			m.widthContainer = int(math.Min(float64(m.viewportWidth-10), 100))
+			m.heightContainer = int(math.Min(float64(msg.Height), 40))
 		}
 
 		m.widthContent = m.widthContainer - 2
@@ -274,35 +217,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd := m.CursorUpdate(msg)
 		return m, cmd
 
-	case terminal.ViewInitResponseData:
-		m.user = msg.Profile
-		m.products = msg.Products
-		m.cart = msg.Cart
-		m.cards = msg.Cards
-		m.addresses = msg.Addresses
-		m.subscriptions = msg.Subscriptions
-		m.tokens = msg.Tokens
-		m.apps = msg.Apps
-		m.orders = msg.Orders
-		m.region = &msg.Region
-	case terminal.Profile:
-		m.user = msg
-	case []terminal.Product:
-		m.products = msg
-	case terminal.Cart:
-		m.cart = msg
-	case []terminal.Card:
-		m.cards = msg
-	case []terminal.Address:
-		m.addresses = msg
-	case []terminal.Subscription:
-		m.subscriptions = msg
-	case []terminal.Token:
-		m.tokens = msg
-	case []terminal.App:
-		m.apps = msg
-	case []terminal.Order:
-		m.orders = msg
+
 	}
 
 	var cmd tea.Cmd
@@ -311,14 +226,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m, cmd = m.MenuUpdate(msg)
 	case splashPage:
 		m, cmd = m.SplashUpdate(msg)
-	case accountPage:
-		m, cmd = m.AccountUpdate(msg)
-	case aboutPage:
-		m, cmd = m.AboutUpdate(msg)
+	case projectsPage:
+		m, cmd = m.ProjectUpdate(msg)
+
 	case contactPage:
 		m, cmd = m.ContactUpdate(msg)
-	case shopPage:
-		m, cmd = m.ShopUpdate(msg)
+	case aboutPage:
+		m, cmd = m.AboutUpdate(msg)
 
 	}
 
@@ -390,11 +304,11 @@ func (m model) View() string {
 func (m model) getContent() string {
 	page := "unknown"
 	switch m.page {
-	case shopPage:
-		page = m.ShopView()
+	case aboutPage:
+		page = m.AboutView()
 
-	case accountPage:
-		page = m.AccountView()
+	case projectsPage:
+		page = m.ProjectView()
 	case skillsPage:
 		page = m.SkillsView(m.widthContent)
 	case contactPage:

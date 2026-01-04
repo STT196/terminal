@@ -21,23 +21,23 @@ func (m model) MenuUpdate(msg tea.Msg) (model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "s":
-			return m.ShopSwitch()
-		case "a":
-			return m.AccountSwitch()
+			return m.AboutSwitch()
+		case "p":
+			return m.ProjectSwitch()
 		case "esc":
 			switch m.state.menu.lastPage {
 			// case aboutPage:
 			// 	return m.AboutSwitch()
 			// case faqPage:
 			// 	return m.FaqSwitch()
-			case accountPage:
-				return m.AccountSwitch()
+			case projectsPage:
+				return m.ProjectSwitch()
 			// case paymentPage:
 			// 	return m.PaymentSwitch()
 			// case cartPage:
 			// 	return m.CartSwitch()
 			default:
-				return m.ShopSwitch()
+				return m.AboutSwitch()
 			}
 		}
 	}
@@ -52,10 +52,11 @@ func (m model) MenuView() string {
 	menu :=
 		table.New().
 			Border(lipgloss.HiddenBorder()).
-			Row(bold("s"), base("shop")).
-			Row(bold("a"), base("account")).
+			Row(bold("a"), base("about")).
+			Row(bold("p"), base("projects")).
 			// Row(bold("f"), base("faq")).
-			Row(bold("c"), base("cart")).
+			Row(bold("s"), base("skills")).
+			Row(bold("c"), base("contact")).
 			Row("").
 			StyleFunc(func(row, col int) lipgloss.Style {
 				return m.theme.Base().
@@ -64,9 +65,9 @@ func (m model) MenuView() string {
 			})
 
 	for _, cmd := range m.state.footer.commands {
-		if cmd.key == "s" ||
-			cmd.key == "a" ||
-			// cmd.key == "f" ||
+		if cmd.key == "a" ||
+			cmd.key == "p" ||
+			cmd.key == "s" ||
 			cmd.key == "c" {
 			continue
 		}

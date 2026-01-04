@@ -16,9 +16,9 @@ func (m model) HeaderUpdate(msg tea.Msg) (model, tea.Cmd) {
 		switch msg.String() {
 		
 		case "a":
-			return m.ShopSwitch()
+			return m.AboutSwitch()
 		case "p":
-			return m.AccountSwitch()
+			return m.ProjectSwitch()
 		case "s":
 			return m.SkillsSwitch()
 		case "c":
@@ -45,16 +45,16 @@ func (m model) HeaderView() string {
 	menu := bold("m") + base(" ☰")
 	mark := bold("t") + cursor
 	logo := bold("STT196")
-	shop := accent("a") + base(" about")
-	account := accent("p") + base(" projects")
+	about := accent("a") + base(" about")
+	project := accent("p") + base(" projects")
 	skills := accent("s") + base(" skills")
 	contact := accent("c") + base(" contact")
 
 	switch m.page {
-	case shopPage:
-		shop = accent("a about")
-	case accountPage:
-		account = accent("p projects")
+	case aboutPage:
+		about = accent("a about")
+	case projectsPage:
+		project = accent("p projects")
 	case skillsPage:
 		skills = accent("s skills")
 	case contactPage:
@@ -76,8 +76,8 @@ func (m model) HeaderView() string {
 	default:
 		tabs = []string{
 			logo,
-			shop,
-			account,
+			about,
+			project,
 			skills,
 			contact,
 		}

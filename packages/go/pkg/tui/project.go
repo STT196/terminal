@@ -6,7 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-type accountState struct {
+type projectState struct {
 	selected       int
 	focused        bool
 	menuViewport   viewport.Model
@@ -37,30 +37,30 @@ func (m model) updateAccountViewports() model {
 		}
 	}
 
-	if !m.state.account.viewportsReady {
+	if !m.state.project.viewportsReady {
 		// Initialize viewports for the first time
-		m.state.account.menuViewport = viewport.New(menuWidth, availableHeight)
-		m.state.account.menuViewport.KeyMap = viewport.KeyMap{}
-		m.state.account.detailViewport = viewport.New(detailWidth, availableHeight)
-		m.state.account.detailViewport.KeyMap = modifiedKeyMap
+		m.state.project.menuViewport = viewport.New(menuWidth, availableHeight)
+		m.state.project.menuViewport.KeyMap = viewport.KeyMap{}
+		m.state.project.detailViewport = viewport.New(detailWidth, availableHeight)
+		m.state.project.detailViewport.KeyMap = modifiedKeyMap
 
-		m.state.account.viewportsReady = true
+		m.state.project.viewportsReady = true
 	} else {
 		// Update existing viewports
-		m.state.account.menuViewport.Width = menuWidth
-		m.state.account.menuViewport.Height = availableHeight
+		m.state.project.menuViewport.Width = menuWidth
+		m.state.project.menuViewport.Height = availableHeight
 
-		m.state.account.detailViewport.Width = detailWidth
-		m.state.account.detailViewport.Height = availableHeight
+		m.state.project.detailViewport.Width = detailWidth
+		m.state.project.detailViewport.Height = availableHeight
 	}
 
 	return m
 }
 
-func (m model) AccountSwitch() (model, tea.Cmd) {
-	m = m.SwitchPage(accountPage)
-	m.state.account.selected = 0
-	m.state.account.focused = false
+func (m model) ProjectSwitch() (model, tea.Cmd) {
+	m = m.SwitchPage(projectsPage)
+	m.state.project.selected = 0
+	m.state.project.focused = false
 
 	m.state.footer.commands = []footerCommand{
 		{key: "↑/↓", value: "navigate"},
@@ -68,12 +68,12 @@ func (m model) AccountSwitch() (model, tea.Cmd) {
 	}
 
 	m = m.updateAccountViewports()
-	m.state.account.menuViewport.GotoTop()
-	m.state.account.detailViewport.GotoTop()
+	m.state.project.menuViewport.GotoTop()
+	m.state.project.detailViewport.GotoTop()
 	return m, nil
 }
 
-func (m model) AccountUpdate(msg tea.Msg) (model, tea.Cmd) {
+func (m model) ProjectUpdate(msg tea.Msg) (model, tea.Cmd) {
 	var cmd tea.Cmd
 	var cmds []tea.Cmd
 
@@ -86,35 +86,35 @@ func (m model) AccountUpdate(msg tea.Msg) (model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "tab", "down", "j":
-			if m.state.account.selected < len(m.projects)-1 {
-				m.state.account.selected++
+			if m.state.project.selected < len(m.projects)-1 {
+				m.state.project.selected++
 				// Scroll menu to keep selected item visible
-				m.state.account.menuViewport.LineDown(2)
+				m.state.project.menuViewport.LineDown(2)
 			}
 		case "shift+tab", "up", "k":
-			if m.state.account.selected > 0 {
-				m.state.account.selected--
+			if m.state.project.selected > 0 {
+				m.state.project.selected--
 				// Scroll menu to keep selected item visible
-				m.state.account.menuViewport.LineUp(2)
+				m.state.project.menuViewport.LineUp(2)
 			}
 		case "pgup":
-			m.state.account.detailViewport.LineUp(5)
+			m.state.project.detailViewport.LineUp(5)
 		case "pgdown":
-			m.state.account.detailViewport.LineDown(5)
+			m.state.project.detailViewport.LineDown(5)
 		}
 	}
 
 	// Update viewports with new content
-	if m.state.account.viewportsReady {
+	if m.state.project.viewportsReady {
 		menuContent := m.getProjectsMenuContent()
-		m.state.account.menuViewport.SetContent(menuContent)
+		m.state.project.menuViewport.SetContent(menuContent)
 
-		detailContent := m.getProjectsContent(m.state.account.detailViewport.Width - 4)
-		m.state.account.detailViewport.SetContent(detailContent)
+		detailContent := m.getProjectsContent(m.state.project.detailViewport.Width - 4)
+		m.state.project.detailViewport.SetContent(detailContent)
 	}
 
 	// Only update detail viewport for scroll; menu stays static
-	m.state.account.detailViewport, cmd = m.state.account.detailViewport.Update(msg)
+	m.state.project.detailViewport, cmd = m.state.project.detailViewport.Update(msg)
 	cmds = append(cmds, cmd)
 
 	if len(cmds) > 0 {
@@ -123,34 +123,34 @@ func (m model) AccountUpdate(msg tea.Msg) (model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) AccountView() string {
-	if !m.state.account.viewportsReady {
+func (m model) ProjectView() string {
+	if !m.state.project.viewportsReady {
 		m = m.updateAccountViewports()
 	}
 
 	// Always show projects menu on the left
 	menuContent := m.getProjectsMenuContent()
-	m.state.account.menuViewport.SetContent(menuContent)
+	m.state.project.menuViewport.SetContent(menuContent)
 
 	// Show selected project details on the right
-	detailContent := m.getProjectsContent(m.state.account.detailViewport.Width - 4)
-	m.state.account.detailViewport.SetContent(detailContent)
+	detailContent := m.getProjectsContent(m.state.project.detailViewport.Width - 4)
+	m.state.project.detailViewport.SetContent(detailContent)
 
 	// Combine viewport views
 	if m.size < large {
 		// For small screens, stack the viewports vertically
 		return lipgloss.JoinVertical(
 			lipgloss.Top,
-			m.state.account.menuViewport.View(),
-			m.state.account.detailViewport.View(),
+			m.state.project.menuViewport.View(),
+			m.state.project.detailViewport.View(),
 		)
 	} else {
 		// For large screens, place viewports side by side
 		return lipgloss.JoinHorizontal(
 			lipgloss.Top,
-			m.state.account.menuViewport.View(),
+			m.state.project.menuViewport.View(),
 			"  ",
-			m.state.account.detailViewport.View(),
+			m.state.project.detailViewport.View(),
 		)
 	}
 }

@@ -26,7 +26,7 @@ func (m model) SplashInit() tea.Cmd {
 func (m model) SplashUpdate(msg tea.Msg) (model, tea.Cmd) {
 	switch msg.(type) {
 	case splashDoneMsg:
-		return m.ShopSwitch()
+		return m.AboutSwitch()
 	}
 	return m, nil
 }
