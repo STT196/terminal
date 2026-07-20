@@ -2,28 +2,18 @@ import "zod-openapi/extend";
 import { Hono, MiddlewareHandler } from "hono";
 import { logger } from "hono/logger";
 import { VisibleError, ErrorCodes } from "@terminal/core/error";
-import { ProductApi } from "./product";
-import { CartApi } from "./cart";
 import { Actor } from "@terminal/core/actor";
-import { CardApi } from "./card";
-import { OrderApi } from "./order";
-import { Hook } from "./hook";
-import { Print } from "./print";
-import { EmailApi } from "./email";
-import { SubscriptionApi } from "./subscription";
+import { ProjectApi } from "./project";
 import { createClient } from "@openauthjs/openauth/client";
 import { Resource } from "sst";
 import { subjects } from "../subject";
 import { openAPISpecs } from "hono-openapi";
 import { HTTPException } from "hono/http-exception";
-import { AddressApi } from "./address";
 import { Api } from "@terminal/core/api/api";
 import { ProfileApi } from "./profile";
 import { ViewApi } from "./view";
 import { AppApi } from "./app";
 import { TokenApi } from "./token";
-import { ProductFilter } from "@terminal/core/product/filter";
-import { getRegionFromIP } from "./ipinfo";
 import { Log } from "@terminal/core/util/log";
 import packageJson from "../../package.json" assert { type: "json" };
 
@@ -88,36 +78,6 @@ const auth: MiddlewareHandler = async (c, next) => {
   return Actor.provide("public", {}, next);
 };
 
-const filter: MiddlewareHandler = async (c, next) => {
-  // Get IP address from headers
-  const ip =
-    c.req.header("x-terminal-ip") ??
-    c.req.header("CloudFront-Viewer-Address")?.split(":")[0];
-
-  // Get existing region header if present
-  let region = c.req.header("x-terminal-region") as any;
-
-  // If no region header but we have an IP, look up the region
-  const isWebhook = c.req.path.startsWith("/hook");
-  if (!region && ip && !isWebhook) {
-    try {
-      region = await getRegionFromIP(ip);
-    } catch (error: any) {
-      log.error(error);
-    }
-  }
-
-  return ProductFilter.provide(
-    {
-      region,
-    },
-    () => {
-      log.info("filter", ProductFilter.use());
-      return next();
-    },
-  );
-};
-
 export const app = new Hono();
 
 app
@@ -126,23 +86,14 @@ app
     c.header("Cache-Control", "no-store");
     return next();
   })
-  .use(auth)
-  .use(filter);
+  .use(auth);
 
 export const routes = app
-  .route("/product", ProductApi.route)
+  .route("/project", ProjectApi.route)
   .route("/profile", ProfileApi.route)
-  .route("/address", AddressApi.route)
-  .route("/card", CardApi.route)
-  .route("/cart", CartApi.route)
-  .route("/order", OrderApi.route)
-  .route("/subscription", SubscriptionApi.route)
   .route("/token", TokenApi.route)
   .route("/app", AppApi.route)
   .route("/view", ViewApi.route)
-  .route("/email", EmailApi.route)
-  .route("/hook", Hook.route)
-  .route("/print", Print.route)
   .onError((error, c) => {
     // Handle our custom VisibleError
     if (error instanceof VisibleError) {

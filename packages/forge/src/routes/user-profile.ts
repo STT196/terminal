@@ -1,156 +1,9 @@
-import { Action, Layout, Page, ctx, io } from "@forgeapp/sdk";
-import { useTransaction } from "@terminal/core/drizzle/transaction";
-import { addressTable } from "@terminal/core/address/address.sql";
-import { eq } from "@terminal/core/drizzle/index";
-import { createID } from "@terminal/core/util/id";
+import { Layout, Page, ctx, io } from "@forgeapp/sdk";
 import * as queries from "../queries";
-import * as formatters from "../formatters";
 
 export const UserProfile = new Page({
   name: "User Profile",
   unlisted: true,
-  routes: {
-    addAddress: new Action({
-      name: "Add Address",
-      unlisted: true,
-      handler: async () => {
-        const userID = ctx.params.userID as string | undefined;
-        if (!userID) {
-          throw new Error("User ID is required");
-        }
-
-        const user = await queries.getUser(userID);
-        if (!user) {
-          throw new Error("User not found");
-        }
-
-        const [name, street1, street2, city, province, zip, country, phone] =
-          await io.group([
-            io.input.text("Name", { placeholder: "Recipient name" }),
-            io.input.text("Street 1", { placeholder: "Street address" }),
-            io.input.text("Street 2", { placeholder: "Apt, suite, etc." }).optional(),
-            io.input.text("City"),
-            io.input.text("State / Province"),
-            io.input.text("Zip / Postal Code"),
-            io.input.text("Country", {
-              placeholder: "2-letter country code (e.g. US)",
-              defaultValue: "US",
-            }),
-            io.input.text("Phone", { placeholder: "Phone number" }).optional(),
-          ]);
-
-        // Create the address for this user
-        const addressID = createID("userShipping");
-        await useTransaction(async (tx) => {
-          await tx.insert(addressTable).values({
-            id: addressID,
-            userID,
-            address: {
-              name,
-              street1,
-              street2,
-              city,
-              province,
-              zip,
-              country,
-              phone,
-            },
-          });
-        });
-
-        await ctx.redirect({
-          route: "userProfile",
-          params: { userID },
-        });
-      },
-    }),
-    editAddress: new Action({
-      name: "Edit Address",
-      unlisted: true,
-      handler: async () => {
-        const userID = ctx.params.userID as string | undefined;
-        const addressID = ctx.params.addressID as string | undefined;
-
-        if (!userID) {
-          throw new Error("User ID is required");
-        }
-        if (!addressID) {
-          throw new Error("Address ID is required");
-        }
-
-        const address = await queries.getAddress(addressID);
-        if (!address) {
-          throw new Error("Address not found");
-        }
-
-        // Verify the address belongs to this user
-        if (address.userID !== userID) {
-          throw new Error("Address does not belong to this user");
-        }
-
-        const [name, street1, street2, city, province, zip, country, phone] =
-          await io.group([
-            io.input.text("Name", {
-              placeholder: "Recipient name",
-              defaultValue: address.address?.name || "",
-            }),
-            io.input.text("Street 1", {
-              placeholder: "Street address",
-              defaultValue: address.address?.street1 || "",
-            }),
-            io.input
-              .text("Street 2", {
-                placeholder: "Apt, suite, etc.",
-                defaultValue: address.address?.street2 || "",
-              })
-              .optional(),
-            io.input.text("City", {
-              defaultValue: address.address?.city || "",
-            }),
-            io.input.text("State / Province", {
-              defaultValue: address.address?.province || "",
-            }),
-            io.input.text("Zip / Postal Code", {
-              defaultValue: address.address?.zip || "",
-            }),
-            io.input.text("Country", {
-              placeholder: "2-letter country code (e.g. US)",
-              defaultValue: address.address?.country || "US",
-            }),
-            io.input
-              .text("Phone", {
-                placeholder: "Phone number",
-                defaultValue: address.address?.phone || "",
-              })
-              .optional(),
-          ]);
-
-        // Update the address
-        await useTransaction(async (tx) => {
-          await tx
-            .update(addressTable)
-            .set({
-              address: {
-                name,
-                street1,
-                street2,
-                city,
-                province,
-                zip,
-                country,
-                phone,
-              },
-            })
-            .where(eq(addressTable.id, addressID));
-        });
-
-        await ctx.redirect({
-          route: "userProfile",
-          params: { userID },
-        });
-      },
-    }),
-  },
   handler: async () => {
     const userID = ctx.params.userID as string | undefined;
     if (!userID) {
@@ -164,17 +17,7 @@ export const UserProfile = new Page({
 
     return new Layout({
       title: `User Profile: ${user.name || user.email || userID}`,
-      menuItems: [
-        {
-          label: "Add Address",
-          route: "userProfile/addAddress",
-          params: {
-            userID,
-          },
-        },
-      ],
       children: [
-        // User Basic Info
         io.display.metadata("User Information", {
           layout: "grid",
           data: [
@@ -191,22 +34,6 @@ export const UserProfile = new Page({
               value: user.email || "N/A",
             },
             {
-              label: "Stripe Customer ID",
-              value: user.stripeCustomerID,
-            },
-            {
-              label: "Email Octopus ID",
-              value: user.emailOctopusID || "N/A",
-            },
-            {
-              label: "Fingerprint",
-              value: user.fingerprint || "N/A",
-            },
-            {
-              label: "Flags",
-              value: JSON.stringify(user.flags || {}),
-            },
-            {
               label: "Created",
               value: user.timeCreated?.toISOString() || "N/A",
             },
@@ -216,38 +43,10 @@ export const UserProfile = new Page({
             },
           ],
         }),
-
-        // Orders Table
-        io.display.heading("Orders", { level: 3 }),
-        io.display.table("Orders", {
-          getData: async (input) =>
-            queries.getUserOrders(userID, {
-              offset: input.offset,
-              pageSize: input.pageSize,
-            }),
-          rowMenuItems: (row) =>
-            [
-              row.labelURL && {
-                label: "Label",
-                url: row.labelURL!,
-              },
-              row.trackingURL && {
-                label: "Tracking",
-                url: row.trackingURL!,
-              },
-            ].filter(Boolean) as any,
-          columns: [
-            "id",
-            {
-              label: "amount",
-              renderCell: (row) => ({
-                label: formatters.formatTotalAmount(row.amount, row.shippingAmount),
-              }),
-            },
-            {
-              label: "shipping address",
-              renderCell: (row) => ({
-                label: formatters.formatShippingAddressInline(row.shippingAddress),
+      ],
+    });
+  },
+});
               }),
             },
             "email",

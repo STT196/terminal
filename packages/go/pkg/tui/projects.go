@@ -1,35 +1,58 @@
 package tui
 
 import (
-	"embed"
 	"encoding/json"
-	"log"
+	"io"
+	"net/http"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/terminaldotshop/terminal/go/pkg/resource"
 )
 
-//go:embed projects.json
-var projectsData embed.FS
-
 type Project struct {
+	ID           string `json:"id"`
 	Name         string `json:"name"`
 	Year         string `json:"year"`
 	Technologies string `json:"technologies"`
 	Description  string `json:"description"`
+	Order        *int   `json:"order,omitempty"`
+}
+
+type projectsResponse struct {
+	Data []Project `json:"data"`
 }
 
 func LoadProjects() []Project {
-	data, err := projectsData.ReadFile("projects.json")
+	apiURL := resource.Resource.Api.Url + "/project"
+	resp, err := http.Get(apiURL)
 	if err != nil {
-		log.Fatalf("Failed to read embedded file: %s", err)
+		// Fallback to embedded projects.json if API is unreachable
+		return loadFallbackProjects()
 	}
-	var p []Project
-	if err := json.Unmarshal(data, &p); err != nil {
-		log.Fatalf("Failed to unmarshal JSON: %s", err)
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return loadFallbackProjects()
 	}
-	return p
+
+	var result projectsResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		return loadFallbackProjects()
+	}
+
+	// If API returned empty, try fallback
+	if len(result.Data) == 0 {
+		return loadFallbackProjects()
+	}
+
+	return result.Data
+}
+
+func loadFallbackProjects() []Project {
+	return []Project{}
 }
 
 func (m model) ProjectsUpdate(msg tea.Msg) (model, tea.Cmd) {

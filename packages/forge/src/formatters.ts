@@ -1,5 +1,3 @@
-import { SubscriptionSchedule } from "@terminal/core/subscription/subscription.sql";
-
 /**
  * Format currency from cents to dollars
  */
@@ -7,47 +5,6 @@ export function formatCurrency(cents: number | string | null | undefined): strin
   const amount = typeof cents === "string" ? parseInt(cents) : cents || 0;
   return `$${(amount / 100).toFixed(2)}`;
 }
-
-/**
- * Format total amount including shipping
- */
-export function formatTotalAmount(
-  subtotalCents: number | string | null | undefined,
-  shippingCents: number | null | undefined,
-): string {
-  const subtotal = typeof subtotalCents === "string" ? parseInt(subtotalCents) : subtotalCents || 0;
-  const shipping = shippingCents || 0;
-  return `$${((subtotal + shipping) / 100).toFixed(2)}`;
-}
-
-/**
- * Format subscription schedule
- */
-export function formatSchedule(schedule: SubscriptionSchedule | null | undefined): string {
-  if (!schedule) return "N/A";
-  if (schedule.type === "weekly") {
-    return `every ${schedule.interval} weeks`;
-  }
-  return schedule.type;
-}
-
-/**
- * Format address as a short string (city, province, country)
- */
-export function formatAddressShort(address: any): string {
-  if (!address) return "N/A";
-  const parts = [
-    address.city,
-    address.province,
-    address.country,
-  ].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : "N/A";
-}
-
-/**
- * Format address as a full multi-line string
- */
-export function formatAddressFull(address: any): string {
   if (!address) return "N/A";
   const parts = [
     address.name,

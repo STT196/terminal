@@ -26,3 +26,4 @@ host_key.pem
 host_key.pem.pub
 
 packages/*.zip
+packages/go.zip

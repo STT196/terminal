@@ -9,8 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	terminal "github.com/terminaldotshop/terminal-sdk-go"
-	"github.com/terminaldotshop/terminal/go/pkg/api"
 	"github.com/terminaldotshop/terminal/go/pkg/tui/theme"
 )
 
@@ -40,23 +38,8 @@ type model struct {
 	switched      bool
 	page          page
 	state         state
-	region        *terminal.Region
 	context       context.Context
-	client        *terminal.Client
-	user          terminal.Profile
-	accountPages  []page
-	products      []terminal.Product
-	addresses     []terminal.Address
-	cards         []terminal.Card
-	subscriptions []terminal.Subscription
-	tokens        []terminal.Token
-	apps          []terminal.App
-	orders        []terminal.Order
-	order         *terminal.Order
-	cart          terminal.Cart
-	subscription  terminal.SubscriptionParam
 	renderer      *lipgloss.Renderer
-	// output          *termenv.Output
 	theme           theme.Theme
 	fingerprint     string
 	anonymous       bool
@@ -99,18 +82,14 @@ func NewModel(
 	clientIP *string,
 	command []string,
 ) (tea.Model, error) {
-	api.Init()
-
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "client_ip", clientIP)
 
 	result := model{
 		command:  command,
 		context:  ctx,
-		region:   nil,
 		page:     splashPage,
 		renderer: renderer,
-		// output:      renderer.Output(),
 		fingerprint: fingerprint,
 		anonymous:   anonymous,
 		theme:       theme.BasicTheme(renderer, nil),
@@ -143,13 +122,13 @@ func (m model) InitialDataLoaded() (model, tea.Cmd) {
 		return m.AboutSwitch()
 	}
 
-	// TODO: support multiple commands?
+	// Search projects by command
 	command := strings.ToLower(m.command[0])
 
-	for index, product := range m.products {
-		if strings.ToLower(product.Name) == command {
-			m.state.about.selected = index
-			return m.AboutSwitch()
+	for index, project := range m.projects {
+		if strings.ToLower(project.Name) == command {
+			m.state.project.selected = index
+			return m.SwitchPage(projectsPage), nil
 		}
 	}
 
@@ -164,16 +143,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.error = &msg
 	case error:
 		m.error = &VisibleError{
-			message: api.GetErrorMessage(msg),
-		}
-		if m.page == aboutPage{
-			cmds = append(cmds, func() tea.Msg {
-				response, err := m.client.Cart.Get(m.context)
-				if err != nil {
-					return VisibleError{message: "something went wrong, restart the ssh session"}
-				}
-				return response.Data
-			})
+			message: msg.Error(),
 		}
 	case tea.WindowSizeMsg:
 		m.viewportWidth = msg.Width
