@@ -9,23 +9,9 @@ services:
       SSH_PORT: "2222"
       HTTP_PORT: "8000"
     ports:
-      - "2222:2222"
-      - "8000:8000"
-    networks:
-      - terminal-net
-
-  nginx:
-    image: nginx:stable-alpine
-    container_name: terminal-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+      - "22:2222"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /etc/letsencrypt:/etc/letsencrypt:ro
-    depends_on:
-      - terminal-ssh
+      - ./data:/data
     networks:
       - terminal-net
 

@@ -33,13 +33,13 @@ const (
 )
 
 type model struct {
-	ready         bool
-	command       []string
-	switched      bool
-	page          page
-	state         state
-	context       context.Context
-	renderer      *lipgloss.Renderer
+	ready           bool
+	command         []string
+	switched        bool
+	page            page
+	state           state
+	context         context.Context
+	renderer        *lipgloss.Renderer
 	theme           theme.Theme
 	fingerprint     string
 	anonymous       bool
@@ -86,10 +86,10 @@ func NewModel(
 	ctx = context.WithValue(ctx, "client_ip", clientIP)
 
 	result := model{
-		command:  command,
-		context:  ctx,
-		page:     splashPage,
-		renderer: renderer,
+		command:     command,
+		context:     ctx,
+		page:        splashPage,
+		renderer:    renderer,
 		fingerprint: fingerprint,
 		anonymous:   anonymous,
 		theme:       theme.BasicTheme(renderer, nil),
@@ -186,7 +186,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case CursorTickMsg:
 		m, cmd := m.CursorUpdate(msg)
 		return m, cmd
-
 
 	}
 

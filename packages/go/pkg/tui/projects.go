@@ -1,15 +1,20 @@
 package tui
 
 import (
+	"embed"
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/terminaldotshop/terminal/go/pkg/resource"
 )
+
+//go:embed projects.json
+var fallbackProjectsData embed.FS
 
 type Project struct {
 	ID           string `json:"id"`
@@ -25,34 +30,46 @@ type projectsResponse struct {
 }
 
 func LoadProjects() []Project {
+	// 1. Try the API first
 	apiURL := resource.Resource.Api.Url + "/project"
 	resp, err := http.Get(apiURL)
-	if err != nil {
-		// Fallback to embedded projects.json if API is unreachable
-		return loadFallbackProjects()
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return loadFallbackProjects()
-	}
-
-	var result projectsResponse
-	if err := json.Unmarshal(body, &result); err != nil {
-		return loadFallbackProjects()
+	if err == nil {
+		defer resp.Body.Close()
+		body, err := io.ReadAll(resp.Body)
+		if err == nil {
+			var result projectsResponse
+			if err := json.Unmarshal(body, &result); err == nil && len(result.Data) > 0 {
+				return result.Data
+			}
+		}
 	}
 
-	// If API returned empty, try fallback
-	if len(result.Data) == 0 {
-		return loadFallbackProjects()
+	// 2. Try external file (configurable via PROJECTS_FILE env var)
+	projectsFile := os.Getenv("PROJECTS_FILE")
+	if projectsFile == "" {
+		projectsFile = "/data/projects.json"
+	}
+	if data, err := os.ReadFile(projectsFile); err == nil {
+		var p []Project
+		if err := json.Unmarshal(data, &p); err == nil && len(p) > 0 {
+			return p
+		}
 	}
 
-	return result.Data
+	// 3. Fall back to embedded projects.json
+	return loadFallbackProjects()
 }
 
 func loadFallbackProjects() []Project {
-	return []Project{}
+	data, err := fallbackProjectsData.ReadFile("projects.json")
+	if err != nil {
+		return []Project{}
+	}
+	var p []Project
+	if err := json.Unmarshal(data, &p); err != nil {
+		return []Project{}
+	}
+	return p
 }
 
 func (m model) ProjectsUpdate(msg tea.Msg) (model, tea.Cmd) {

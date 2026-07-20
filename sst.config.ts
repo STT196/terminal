@@ -15,7 +15,6 @@ export default $config({
               : "terminal-dev",
         },
         cloudflare: true,
-        "pulumi-stripe": true,
         random: true,
         tls: true,
         planetscale: "0.2.2",

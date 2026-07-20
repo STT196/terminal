@@ -1,0 +1,27 @@
+[
+  {
+    "name": "Spring Boot & React Full-Stack Deployment with Docker",
+    "year": "2025",
+    "technologies": "Spring Boot, React, Docker, Docker Compose, Nginx, GitHub Actions, Linux",
+    "description": "• Containerized both Spring Boot backend and React frontend using multi-stage Docker builds to create optimized, production-ready images.\n • Deployed the full-stack system using Docker Compose with isolated containers and an internal Docker network for secure service communication.\n • Configured Nginx as a reverse proxy for frontend hosting and API routing to ensure stable, scalable backend access.\n • Implemented CI/CD workflow with GitHub Actions to automate builds, containerization, testing, and deployment to a Linux VPS environment.\n • Enhanced application performance and deployment reliability by reducing image size, standardizing environments, and automating repetitive tasks."
+  },
+  {
+    "name": "Flask Web Application DevOps Pipeline",
+    "year": "2025",
+    "technologies": "Flask, GitHub Actions, Nginx, Gunicorn, Linux VPS, Bash scripting",
+    "description": "• Deployed Flask web application with automated CI/CD pipeline using GitHub Actions for continuous integration and deployment.\n • Configured Nginx reverse proxy and Gunicorn WSGI server for production hosting with load balancing and SSL termination.\n • Implemented monitoring and logging solutions for application performance tracking and issue resolution.\n • Created Bash scripts for automated deployment processes reducing manual intervention by 90%."
+  },
+  {
+    "name": "Laravel Application Infrastructure & CI/CD",
+    "year": "2024",
+    "technologies": "Laravel, GitHub Actions, MySQL, Nginx, PHP-fpm, Linux administration",
+    "description": "• Designed and implemented complete DevOps pipeline for Laravel web application with automated testing and deployment.\n • Configured PHP-fpm and Nginx for optimal PHP application performance and resource management.\n • Managed MySQL database operations including backups, performance tuning, and replication setup.\n • Implemented infrastructure monitoring and alerting systems for proactive issue detection and resolution."
+  },
+  {
+    "name": "Windows Server Infrastructure Automation",
+    "year": "2024",
+    "technologies": "Windows Server 2019, PowerShell, Active Directory, Network services",
+    "description": "• Automated infrastructure setup using PowerShell scripts for user management and system configuration.\n • Configured network services including DHCP, NAT, and RAS for comprehensive infrastructure management.\n • Implemented automated user provisioning system creating 1,000+ Active Directory accounts with proper permissions.\n • Documented infrastructure procedures and created runbooks for operational continuity and knowledge transfer."
+  }
+  
+]

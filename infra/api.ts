@@ -1,9 +1,7 @@
 import { allSecrets, secret } from "./secret";
 import { domain, shortDomain } from "./dns";
 import { database } from "./database";
-import { webhook as stripeWebhook } from "./stripe";
 import { bus } from "./bus";
-import { email, shortDomainEmail } from "./email";
 
 sst.Linkable.wrap(random.RandomString, (resource) => ({
   properties: {
@@ -32,10 +30,7 @@ export const auth = new sst.aws.Auth("Auth", {
   authorizer: {
     link: [
       bus,
-      secret.StripeSecret,
-      shortDomainEmail,
       database,
-      email,
       secret.GithubClientID,
       secret.GithubClientSecret,
       secret.TwitchClientSecret,
@@ -62,14 +57,9 @@ const apiFn = new sst.aws.Function("ApiFn", {
   streaming: !$dev,
   link: [
     bus,
-    secret.StripeSecret,
-    secret.ShippoSecret,
-    secret.ShippoWebhookSecret,
-    secret.EmailOctopusSecret,
     secret.IpinfoToken,
     auth,
     database,
-    stripeWebhook,
     urls,
   ],
   url: true,

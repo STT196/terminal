@@ -15,9 +15,6 @@ type resource struct {
 	Auth struct {
 		Url string `json:"url"`
 	}
-	StripePublic struct {
-		Value string `json:"value"`
-	}
 	IpinfoToken struct {
 		Value string `json:"value"`
 	}
@@ -53,8 +50,6 @@ func init() {
 				envValue = `{"url":"http://localhost:3000"}`
 			case "Auth":
 				envValue = `{"url":"http://localhost:3001"}`
-			case "StripePublic":
-				envValue = `{"value":"pk_test_local"}`
 			case "IpinfoToken":
 				envValue = `{"value":"test_local"}`
 			case "AuthFingerprintKey":
